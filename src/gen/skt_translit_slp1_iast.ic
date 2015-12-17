@@ -1,0 +1,970 @@
+
+#line 1 "skt_translit_slp1_iast.rl"
+
+#line 538 "skt_translit_slp1_iast.rl"
+
+
+static void skt_translit_slp1_iast(struct skt_buf *buf,
+                           const char *str, size_t len)
+{
+   int cs, act;
+   const unsigned char *ts, *te;
+   const unsigned char *p = (const unsigned char *)str;
+   const unsigned char *pe = &p[len];
+   const unsigned char *const eof = pe;
+
+   buf->size = 0;
+   
+#line 19 "skt_translit_slp1_iast.ic"
+static const char _skt_translit_slp1_iast_actions[] = {
+	0, 1, 0, 1, 1, 1, 2, 1, 
+	3, 1, 4, 1, 5, 1, 6, 1, 
+	7, 1, 8, 1, 9, 1, 10, 1, 
+	11, 1, 12, 1, 13, 1, 14, 1, 
+	15, 1, 16, 1, 17, 1, 18, 1, 
+	19, 1, 20, 1, 21, 1, 22, 1, 
+	23, 1, 24, 1, 25, 1, 26, 1, 
+	27, 1, 28, 1, 29, 1, 30, 1, 
+	31, 1, 32, 1, 33, 1, 34, 1, 
+	35, 1, 36, 1, 37, 1, 38, 1, 
+	39, 1, 40, 1, 41, 1, 42, 1, 
+	43, 1, 44, 1, 45, 1, 46, 1, 
+	47, 1, 48, 1, 49, 1, 50, 1, 
+	51, 1, 52, 1, 53, 1, 54, 1, 
+	55, 1, 56, 1, 57, 1, 58, 1, 
+	59, 1, 60, 1, 61, 1, 62, 1, 
+	63, 1, 64, 1, 65, 1, 66, 1, 
+	67, 1, 68, 1, 69, 1, 70, 1, 
+	71, 1, 72, 1, 73, 1, 74, 1, 
+	75, 1, 76, 1, 77, 1, 78, 1, 
+	79, 1, 80, 1, 81
+};
+
+static const char _skt_translit_slp1_iast_key_offsets[] = {
+	0, 37, 38, 53, 67, 81, 82
+};
+
+static const unsigned char _skt_translit_slp1_iast_trans_keys[] = {
+	46u, 47u, 65u, 66u, 67u, 68u, 69u, 70u, 
+	71u, 72u, 73u, 74u, 75u, 76u, 77u, 78u, 
+	79u, 80u, 81u, 82u, 83u, 84u, 85u, 87u, 
+	88u, 89u, 94u, 96u, 102u, 106u, 107u, 113u, 
+	119u, 120u, 122u, 124u, 126u, 46u, 65u, 69u, 
+	70u, 73u, 76u, 79u, 85u, 88u, 97u, 101u, 
+	102u, 105u, 111u, 117u, 120u, 65u, 69u, 70u, 
+	73u, 79u, 85u, 88u, 97u, 101u, 102u, 105u, 
+	111u, 117u, 120u, 65u, 69u, 70u, 73u, 79u, 
+	85u, 88u, 97u, 101u, 102u, 105u, 111u, 117u, 
+	120u, 89u, 122u, 0
+};
+
+static const char _skt_translit_slp1_iast_single_lengths[] = {
+	37, 1, 15, 14, 14, 1, 1
+};
+
+static const char _skt_translit_slp1_iast_range_lengths[] = {
+	0, 0, 0, 0, 0, 0, 0
+};
+
+static const char _skt_translit_slp1_iast_index_offsets[] = {
+	0, 38, 40, 56, 71, 86, 88
+};
+
+static const char _skt_translit_slp1_iast_trans_targs[] = {
+	1, 2, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 3, 4, 0, 5, 6, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0
+};
+
+static const unsigned char _skt_translit_slp1_iast_trans_actions[] = {
+	0, 0, 37, 39, 41, 43, 45, 47, 
+	49, 51, 53, 55, 57, 59, 61, 63, 
+	65, 67, 69, 71, 73, 75, 77, 79, 
+	81, 83, 0, 0, 141, 0, 0, 147, 
+	149, 151, 153, 155, 157, 159, 5, 161, 
+	7, 9, 11, 13, 15, 17, 19, 21, 
+	23, 25, 27, 29, 31, 33, 35, 163, 
+	85, 87, 89, 91, 93, 95, 97, 99, 
+	101, 103, 105, 107, 109, 111, 163, 113, 
+	115, 117, 119, 121, 123, 125, 127, 129, 
+	131, 133, 135, 137, 139, 163, 143, 163, 
+	145, 163, 161, 163, 163, 163, 163, 163, 
+	0
+};
+
+static const unsigned char _skt_translit_slp1_iast_to_state_actions[] = {
+	1, 0, 0, 0, 0, 0, 0
+};
+
+static const unsigned char _skt_translit_slp1_iast_from_state_actions[] = {
+	3, 0, 0, 0, 0, 0, 0
+};
+
+static const char _skt_translit_slp1_iast_eof_trans[] = {
+	0, 91, 96, 96, 96, 96, 96
+};
+
+static const int skt_translit_slp1_iast_start = 0;
+static const int skt_translit_slp1_iast_first_final = 0;
+static const int skt_translit_slp1_iast_error = -1;
+
+static const int skt_translit_slp1_iast_en_main = 0;
+
+
+#line 551 "skt_translit_slp1_iast.rl"
+   
+#line 127 "skt_translit_slp1_iast.ic"
+	{
+	cs = skt_translit_slp1_iast_start;
+	ts = 0;
+	te = 0;
+	act = 0;
+	}
+
+#line 552 "skt_translit_slp1_iast.rl"
+   
+#line 137 "skt_translit_slp1_iast.ic"
+	{
+	int _klen;
+	unsigned int _trans;
+	const char *_acts;
+	unsigned int _nacts;
+	const unsigned char *_keys;
+
+	if ( p == pe )
+		goto _test_eof;
+_resume:
+	_acts = _skt_translit_slp1_iast_actions + _skt_translit_slp1_iast_from_state_actions[cs];
+	_nacts = (unsigned int) *_acts++;
+	while ( _nacts-- > 0 ) {
+		switch ( *_acts++ ) {
+	case 1:
+#line 1 "NONE"
+	{ts = p;}
+	break;
+#line 156 "skt_translit_slp1_iast.ic"
+		}
+	}
+
+	_keys = _skt_translit_slp1_iast_trans_keys + _skt_translit_slp1_iast_key_offsets[cs];
+	_trans = _skt_translit_slp1_iast_index_offsets[cs];
+
+	_klen = _skt_translit_slp1_iast_single_lengths[cs];
+	if ( _klen > 0 ) {
+		const unsigned char *_lower = _keys;
+		const unsigned char *_mid;
+		const unsigned char *_upper = _keys + _klen - 1;
+		while (1) {
+			if ( _upper < _lower )
+				break;
+
+			_mid = _lower + ((_upper-_lower) >> 1);
+			if ( (*p) < *_mid )
+				_upper = _mid - 1;
+			else if ( (*p) > *_mid )
+				_lower = _mid + 1;
+			else {
+				_trans += (unsigned int)(_mid - _keys);
+				goto _match;
+			}
+		}
+		_keys += _klen;
+		_trans += _klen;
+	}
+
+	_klen = _skt_translit_slp1_iast_range_lengths[cs];
+	if ( _klen > 0 ) {
+		const unsigned char *_lower = _keys;
+		const unsigned char *_mid;
+		const unsigned char *_upper = _keys + (_klen<<1) - 2;
+		while (1) {
+			if ( _upper < _lower )
+				break;
+
+			_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+			if ( (*p) < _mid[0] )
+				_upper = _mid - 2;
+			else if ( (*p) > _mid[1] )
+				_lower = _mid + 2;
+			else {
+				_trans += (unsigned int)((_mid - _keys)>>1);
+				goto _match;
+			}
+		}
+		_trans += _klen;
+	}
+
+_match:
+_eof_trans:
+	cs = _skt_translit_slp1_iast_trans_targs[_trans];
+
+	if ( _skt_translit_slp1_iast_trans_actions[_trans] == 0 )
+		goto _again;
+
+	_acts = _skt_translit_slp1_iast_actions + _skt_translit_slp1_iast_trans_actions[_trans];
+	_nacts = (unsigned int) *_acts++;
+	while ( _nacts-- > 0 )
+	{
+		switch ( *_acts++ )
+		{
+	case 2:
+#line 383 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 124;
+   buf->data[buf->size++] = 124;
+}}
+	break;
+	case 3:
+#line 254 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 4);
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 129;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 129;
+}}
+	break;
+	case 4:
+#line 106 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 97;
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 173;
+}}
+	break;
+	case 5:
+#line 233 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 157;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 129;
+}}
+	break;
+	case 6:
+#line 328 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 4);
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 171;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 129;
+}}
+	break;
+	case 7:
+#line 113 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 76;
+}}
+	break;
+	case 8:
+#line 118 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 97;
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 186;
+}}
+	break;
+	case 9:
+#line 423 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 4);
+   buf->data[buf->size++] = 197;
+   buf->data[buf->size++] = 171;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 129;
+}}
+	break;
+	case 10:
+#line 97 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 129;
+}}
+	break;
+	case 11:
+#line 214 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 161;
+}}
+	break;
+	case 12:
+#line 248 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 169;
+}}
+	break;
+	case 13:
+#line 176 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 155;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 129;
+}}
+	break;
+	case 14:
+#line 53 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 173;
+}}
+	break;
+	case 15:
+#line 358 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 179;
+}}
+	break;
+	case 16:
+#line 78 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 186;
+}}
+	break;
+	case 17:
+#line 125 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 183;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 129;
+}}
+	break;
+	case 18:
+#line 316 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 129;
+}}
+	break;
+	case 19:
+#line 417 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 98;
+   buf->data[buf->size++] = 104;
+}}
+	break;
+	case 20:
+#line 290 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 99;
+   buf->data[buf->size++] = 104;
+}}
+	break;
+	case 21:
+#line 72 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 100;
+   buf->data[buf->size++] = 104;
+}}
+	break;
+	case 22:
+#line 371 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 97;
+   buf->data[buf->size++] = 105;
+}}
+	break;
+	case 23:
+#line 410 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 157;
+}}
+	break;
+	case 24:
+#line 377 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 103;
+   buf->data[buf->size++] = 104;
+}}
+	break;
+	case 25:
+#line 336 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 165;
+}}
+	break;
+	case 26:
+#line 162 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 171;
+}}
+	break;
+	case 27:
+#line 8 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 106;
+   buf->data[buf->size++] = 104;
+}}
+	break;
+	case 28:
+#line 302 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 107;
+   buf->data[buf->size++] = 104;
+}}
+	break;
+	case 29:
+#line 389 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 187;
+}}
+	break;
+	case 30:
+#line 277 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 131;
+}}
+	break;
+	case 31:
+#line 437 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 133;
+}}
+	break;
+	case 32:
+#line 431 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 97;
+   buf->data[buf->size++] = 117;
+}}
+	break;
+	case 33:
+#line 322 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 112;
+   buf->data[buf->size++] = 104;
+}}
+	break;
+	case 34:
+#line 402 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 4);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 141;
+   buf->data[buf->size++] = 104;
+}}
+	break;
+	case 35:
+#line 444 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 135;
+}}
+	break;
+	case 36:
+#line 396 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 197;
+   buf->data[buf->size++] = 155;
+}}
+	break;
+	case 37:
+#line 227 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 116;
+   buf->data[buf->size++] = 104;
+}}
+	break;
+	case 38:
+#line 271 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 197;
+   buf->data[buf->size++] = 171;
+}}
+	break;
+	case 39:
+#line 350 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 4);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 173;
+   buf->data[buf->size++] = 104;
+}}
+	break;
+	case 40:
+#line 343 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 185;
+}}
+	break;
+	case 41:
+#line 66 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 177;
+}}
+	break;
+	case 42:
+#line 168 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 4);
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 129;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 43:
+#line 142 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 97;
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 172;
+}}
+	break;
+	case 44:
+#line 262 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 157;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 45:
+#line 45 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 4);
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 171;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 46:
+#line 90 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 97;
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 185;
+}}
+	break;
+	case 47:
+#line 134 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 4);
+   buf->data[buf->size++] = 197;
+   buf->data[buf->size++] = 171;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 48:
+#line 14 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 49:
+#line 284 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 160;
+}}
+	break;
+	case 50:
+#line 156 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 168;
+}}
+	break;
+	case 51:
+#line 200 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 155;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 52:
+#line 296 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 172;
+}}
+	break;
+	case 53:
+#line 23 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 178;
+}}
+	break;
+	case 54:
+#line 242 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 185;
+}}
+	break;
+	case 55:
+#line 36 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 183;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 56:
+#line 168 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 4);
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 129;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 57:
+#line 142 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 97;
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 172;
+}}
+	break;
+	case 58:
+#line 262 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 157;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 59:
+#line 45 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 4);
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 171;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 60:
+#line 90 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 97;
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 185;
+}}
+	break;
+	case 61:
+#line 134 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 4);
+   buf->data[buf->size++] = 197;
+   buf->data[buf->size++] = 171;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 62:
+#line 14 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 63:
+#line 284 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 160;
+}}
+	break;
+	case 64:
+#line 156 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 168;
+}}
+	break;
+	case 65:
+#line 200 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 155;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 66:
+#line 296 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 172;
+}}
+	break;
+	case 67:
+#line 23 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 178;
+}}
+	break;
+	case 68:
+#line 242 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 185;
+}}
+	break;
+	case 69:
+#line 36 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 183;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 70:
+#line 29 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 155;
+}}
+	break;
+	case 71:
+#line 149 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 106;
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 177;
+}}
+	break;
+	case 72:
+#line 308 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 4);
+   buf->data[buf->size++] = 107;
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 163;
+}}
+	break;
+	case 73:
+#line 220 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 141;
+}}
+	break;
+	case 74:
+#line 59 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 173;
+}}
+	break;
+	case 75:
+#line 185 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 183;
+}}
+	break;
+	case 76:
+#line 364 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 163;
+}}
+	break;
+	case 77:
+#line 192 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 4);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 183;
+   buf->data[buf->size++] = 104;
+}}
+	break;
+	case 78:
+#line 84 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 131;
+}}
+	break;
+	case 79:
+#line 532 "skt_translit_slp1_iast.rl"
+	{te = p+1;{
+      skt_buf_grow(buf, 1);
+      buf->data[buf->size++] = *p;
+   }}
+	break;
+	case 80:
+#line 209 "skt_translit_slp1_iast.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 124;
+}}
+	break;
+	case 81:
+#line 532 "skt_translit_slp1_iast.rl"
+	{te = p;p--;{
+      skt_buf_grow(buf, 1);
+      buf->data[buf->size++] = *p;
+   }}
+	break;
+#line 938 "skt_translit_slp1_iast.ic"
+		}
+	}
+
+_again:
+	_acts = _skt_translit_slp1_iast_actions + _skt_translit_slp1_iast_to_state_actions[cs];
+	_nacts = (unsigned int) *_acts++;
+	while ( _nacts-- > 0 ) {
+		switch ( *_acts++ ) {
+	case 0:
+#line 1 "NONE"
+	{ts = 0;}
+	break;
+#line 951 "skt_translit_slp1_iast.ic"
+		}
+	}
+
+	if ( ++p != pe )
+		goto _resume;
+	_test_eof: {}
+	if ( p == eof )
+	{
+	if ( _skt_translit_slp1_iast_eof_trans[cs] > 0 ) {
+		_trans = _skt_translit_slp1_iast_eof_trans[cs] - 1;
+		goto _eof_trans;
+	}
+	}
+
+	}
+
+#line 553 "skt_translit_slp1_iast.rl"
+
+   skt_buf_truncate(buf, buf->size);
+}

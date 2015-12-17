@@ -1,0 +1,38 @@
+slp1  iast  /agacCat ágacchat
+slp1  iast  m/anasA  mánasā
+slp1  iast  jagm/uzI jagmúṣī
+
+velthuis iast  Paraatriizikaavivara.na Parātrīśikāvivaraṇa
+# We forgot to transliterate 'f' initially.
+velthuis iast  afgitaa  aṅgitā
+# Special case.
+velthuis iast  napul~~lifga   napulṁliṅga
+
+# Implicit case folding for IAST -> SLP1, but not for characters not in IAST.
+iast  slp1  PRATYABHIJÑĀ   pratyaBijYA
+iast  slp1  Â  Â
+iast  slp1  â  â
+
+# Should detect correctly whether the phonem before EOF is a consonant, in which
+# case we must emit a final virāma.
+iast nagari
+iast  nagari   1  १
+iast nagari   k  क्
+iast nagari   ka क
+iast nagari   ki कि
+iast nagari   kh ख्
+iast nagari   khb ख्ब्
+iast nagari   khbh ख्भ्
+iast nagari   ak अक्
+iast nagari   ik इक्
+iast nagari   k1b   क्१ब्
+iast nagari   pratyabhijñā   प्रत्यभिज्ञा
+# Case folding.
+iast nagari   PRATYABHIJÑĀ   प्रत्यभिज्ञा
+
+# Unknown character.
+iast  nagari   kwk   क्wक्
+
+# When the input scheme is IAST, should be able to use r̥ instead of ṛ, etc.
+iast  nagari   r̥    ऋ
+iast  nagari   ṛ    ऋ

@@ -1,0 +1,77 @@
+VOWEL_A    a		अ
+VOWEL    ā		आ		ा
+VOWEL    i		इ		ि
+VOWEL		ī		ई		ी
+VOWEL		u		उ		ु
+VOWEL		ū		ऊ		ू
+VOWEL		ṛ		ऋ		ृ
+VOWEL		ṝ		ॠ		ॄ
+VOWEL		ḷ		ऌ		ॢ
+VOWEL		ḹ		ॡ		ॣ
+VOWEL		e		ए		े
+VOWEL		ai		ऐ		ै
+VOWEL		o		ओ		ो
+VOWEL		au		औ		ौ
+VOWEL		á		अ॑		'॑'
+VOWEL		ā́		आ॑		'ा॑'
+VOWEL		í		इ॑		'ि॑'
+VOWEL		ī́		ई॑		'ी॑'
+VOWEL		ú		उ॑		'ु॑'
+VOWEL		ū́		ऊ॑		'ू॑'
+VOWEL		ṛ́		ऋ॑		'ॄ॑'
+VOWEL		ṝ́		ॠ॑		'ॄ॑'
+VOWEL		ḷ́		ऌ॑'		'ॢ॑'
+VOWEL		é		ए॑		'े॑'
+VOWEL		aí		ऐ॑		'ै॑'
+VOWEL		ó		ओ॑		'ो॑'
+VOWEL		aú		औ॑		'ौ॑'
+CONSONANT	k		क
+CONSONANT	kh		ख
+CONSONANT	g		ग
+CONSONANT	gh		घ
+CONSONANT	ṅ		ङ
+CONSONANT	c		च
+CONSONANT	ch		छ
+CONSONANT	j		ज
+CONSONANT	jh		झ
+CONSONANT	ñ		ञ
+CONSONANT	ṭ		ट
+CONSONANT	ṭh		ठ
+CONSONANT	ḍ		ड
+CONSONANT	ḍh		ढ
+CONSONANT	ṇ		ण
+CONSONANT	t		त
+CONSONANT	th		थ
+CONSONANT	d		द
+CONSONANT	dh		ध
+CONSONANT	n		न
+CONSONANT	p		प
+CONSONANT	ph		फ
+CONSONANT	b		ब
+CONSONANT	bh		भ
+CONSONANT	m		म
+CONSONANT	y		य
+CONSONANT	r		र
+CONSONANT	l		ल
+CONSONANT	v		व
+CONSONANT	ś		श
+CONSONANT	ṣ		ष
+CONSONANT	s		स
+CONSONANT	h		ह
+CONSONANT	ḻ		ळ
+VIRAMA   <nil> 	्
+REST		ṃ		ं
+REST		ḥ		ः
+REST		'		ऽ
+REST		|		।
+REST		||		॥
+REST		0		०
+REST		1		१
+REST		2		२
+REST		3		३
+REST		4		४
+REST		5		५
+REST		6		 ६
+REST		7		 ७
+REST		8		८
+REST		9		९

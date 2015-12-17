@@ -1,0 +1,15 @@
+Usage: %s [options] [word..]
+Transliterate a Sanskrit string.
+
+Options:
+   -i, --input-scheme=SCHEME  [velthuis]
+   -o, --output-scheme=SCHEME [iast]
+   -l, --list                 print a list of all available mappings
+   -d, --describe             print a description of the substitutions performed
+                                when using the chosen input and output schemes
+
+General options:
+   -h, --help                 print this screen
+
+If positional arguments are given on the command line, those are transliterated.
+Otherwise, the text to transliterate is read from the standard input.

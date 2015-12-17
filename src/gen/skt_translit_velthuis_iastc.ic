@@ -1,0 +1,592 @@
+
+#line 1 "skt_translit_velthuis_iastc.rl"
+
+#line 284 "skt_translit_velthuis_iastc.rl"
+
+
+static void skt_translit_velthuis_iastc(struct skt_buf *buf,
+                           const char *str, size_t len)
+{
+   int cs, act;
+   const unsigned char *ts, *te;
+   const unsigned char *p = (const unsigned char *)str;
+   const unsigned char *pe = &p[len];
+   const unsigned char *const eof = pe;
+
+   buf->size = 0;
+   
+#line 19 "skt_translit_velthuis_iastc.ic"
+static const char _skt_translit_velthuis_iastc_actions[] = {
+	0, 1, 0, 1, 1, 1, 2, 1, 
+	3, 1, 4, 1, 5, 1, 6, 1, 
+	7, 1, 8, 1, 9, 1, 10, 1, 
+	11, 1, 12, 1, 13, 1, 14, 1, 
+	15, 1, 16, 1, 17, 1, 18, 1, 
+	19, 1, 20, 1, 21, 1, 22, 1, 
+	23, 1, 24, 1, 25, 1, 26, 1, 
+	27, 1, 28, 1, 29, 1, 30, 1, 
+	31, 1, 32, 1, 33, 1, 34, 1, 
+	35, 1, 36, 1, 37, 1, 38, 1, 
+	39, 1, 40, 1, 41
+};
+
+static const char _skt_translit_velthuis_iastc_key_offsets[] = {
+	0, 12, 28, 30, 32, 33, 34, 36, 
+	38, 40, 41, 42, 43
+};
+
+static const unsigned char _skt_translit_velthuis_iastc_trans_keys[] = {
+	46u, 65u, 70u, 73u, 85u, 90u, 97u, 102u, 
+	105u, 117u, 122u, 126u, 68u, 72u, 76u, 77u, 
+	78u, 82u, 83u, 84u, 100u, 104u, 108u, 109u, 
+	110u, 114u, 115u, 116u, 76u, 108u, 82u, 114u, 
+	108u, 114u, 65u, 97u, 73u, 105u, 85u, 117u, 
+	97u, 105u, 117u, 78u, 110u, 126u, 0
+};
+
+static const char _skt_translit_velthuis_iastc_single_lengths[] = {
+	12, 16, 2, 2, 1, 1, 2, 2, 
+	2, 1, 1, 1, 3
+};
+
+static const char _skt_translit_velthuis_iastc_range_lengths[] = {
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0
+};
+
+static const char _skt_translit_velthuis_iastc_index_offsets[] = {
+	0, 13, 30, 33, 36, 38, 40, 43, 
+	46, 49, 51, 53, 55
+};
+
+static const char _skt_translit_velthuis_iastc_trans_targs[] = {
+	1, 6, 0, 7, 8, 0, 9, 0, 
+	10, 11, 0, 12, 0, 0, 0, 2, 
+	0, 0, 3, 0, 0, 0, 0, 4, 
+	0, 0, 5, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0, 0, 0, 0
+};
+
+static const char _skt_translit_velthuis_iastc_trans_actions[] = {
+	0, 0, 45, 0, 0, 55, 0, 59, 
+	0, 0, 65, 0, 73, 5, 7, 0, 
+	13, 15, 0, 21, 23, 25, 27, 0, 
+	31, 33, 0, 37, 39, 83, 9, 11, 
+	75, 17, 19, 77, 29, 79, 35, 81, 
+	41, 43, 83, 47, 49, 83, 51, 53, 
+	83, 57, 83, 61, 83, 63, 83, 67, 
+	69, 71, 83, 83, 75, 77, 79, 81, 
+	83, 83, 83, 83, 83, 83, 83, 0
+};
+
+static const char _skt_translit_velthuis_iastc_to_state_actions[] = {
+	1, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0
+};
+
+static const char _skt_translit_velthuis_iastc_from_state_actions[] = {
+	3, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 0
+};
+
+static const char _skt_translit_velthuis_iastc_eof_trans[] = {
+	0, 71, 61, 62, 63, 64, 71, 71, 
+	71, 71, 71, 71, 71
+};
+
+static const int skt_translit_velthuis_iastc_start = 0;
+static const int skt_translit_velthuis_iastc_first_final = 0;
+static const int skt_translit_velthuis_iastc_error = -1;
+
+static const int skt_translit_velthuis_iastc_en_main = 0;
+
+
+#line 297 "skt_translit_velthuis_iastc.rl"
+   
+#line 111 "skt_translit_velthuis_iastc.ic"
+	{
+	cs = skt_translit_velthuis_iastc_start;
+	ts = 0;
+	te = 0;
+	act = 0;
+	}
+
+#line 298 "skt_translit_velthuis_iastc.rl"
+   
+#line 121 "skt_translit_velthuis_iastc.ic"
+	{
+	int _klen;
+	unsigned int _trans;
+	const char *_acts;
+	unsigned int _nacts;
+	const unsigned char *_keys;
+
+	if ( p == pe )
+		goto _test_eof;
+_resume:
+	_acts = _skt_translit_velthuis_iastc_actions + _skt_translit_velthuis_iastc_from_state_actions[cs];
+	_nacts = (unsigned int) *_acts++;
+	while ( _nacts-- > 0 ) {
+		switch ( *_acts++ ) {
+	case 1:
+#line 1 "NONE"
+	{ts = p;}
+	break;
+#line 140 "skt_translit_velthuis_iastc.ic"
+		}
+	}
+
+	_keys = _skt_translit_velthuis_iastc_trans_keys + _skt_translit_velthuis_iastc_key_offsets[cs];
+	_trans = _skt_translit_velthuis_iastc_index_offsets[cs];
+
+	_klen = _skt_translit_velthuis_iastc_single_lengths[cs];
+	if ( _klen > 0 ) {
+		const unsigned char *_lower = _keys;
+		const unsigned char *_mid;
+		const unsigned char *_upper = _keys + _klen - 1;
+		while (1) {
+			if ( _upper < _lower )
+				break;
+
+			_mid = _lower + ((_upper-_lower) >> 1);
+			if ( (*p) < *_mid )
+				_upper = _mid - 1;
+			else if ( (*p) > *_mid )
+				_lower = _mid + 1;
+			else {
+				_trans += (unsigned int)(_mid - _keys);
+				goto _match;
+			}
+		}
+		_keys += _klen;
+		_trans += _klen;
+	}
+
+	_klen = _skt_translit_velthuis_iastc_range_lengths[cs];
+	if ( _klen > 0 ) {
+		const unsigned char *_lower = _keys;
+		const unsigned char *_mid;
+		const unsigned char *_upper = _keys + (_klen<<1) - 2;
+		while (1) {
+			if ( _upper < _lower )
+				break;
+
+			_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+			if ( (*p) < _mid[0] )
+				_upper = _mid - 2;
+			else if ( (*p) > _mid[1] )
+				_lower = _mid + 2;
+			else {
+				_trans += (unsigned int)((_mid - _keys)>>1);
+				goto _match;
+			}
+		}
+		_trans += _klen;
+	}
+
+_match:
+_eof_trans:
+	cs = _skt_translit_velthuis_iastc_trans_targs[_trans];
+
+	if ( _skt_translit_velthuis_iastc_trans_actions[_trans] == 0 )
+		goto _again;
+
+	_acts = _skt_translit_velthuis_iastc_actions + _skt_translit_velthuis_iastc_trans_actions[_trans];
+	_nacts = (unsigned int) *_acts++;
+	while ( _nacts-- > 0 )
+	{
+		switch ( *_acts++ )
+		{
+	case 2:
+#line 76 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 140;
+}}
+	break;
+	case 3:
+#line 211 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 164;
+}}
+	break;
+	case 4:
+#line 138 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 76;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 132;
+}}
+	break;
+	case 5:
+#line 138 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 76;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 132;
+}}
+	break;
+	case 6:
+#line 96 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 130;
+}}
+	break;
+	case 7:
+#line 83 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 134;
+}}
+	break;
+	case 8:
+#line 116 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 82;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 132;
+}}
+	break;
+	case 9:
+#line 116 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 82;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 132;
+}}
+	break;
+	case 10:
+#line 224 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 162;
+}}
+	break;
+	case 11:
+#line 103 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 172;
+}}
+	break;
+	case 12:
+#line 147 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 141;
+}}
+	break;
+	case 13:
+#line 183 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 165;
+}}
+	break;
+	case 14:
+#line 154 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 108;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 132;
+}}
+	break;
+	case 15:
+#line 163 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 131;
+}}
+	break;
+	case 16:
+#line 197 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 135;
+}}
+	break;
+	case 17:
+#line 28 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 114;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 132;
+}}
+	break;
+	case 18:
+#line 21 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 163;
+}}
+	break;
+	case 19:
+#line 190 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 173;
+}}
+	break;
+	case 20:
+#line 90 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 21:
+#line 90 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 128;
+}}
+	break;
+	case 22:
+#line 204 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 132;
+}}
+	break;
+	case 23:
+#line 57 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 170;
+}}
+	break;
+	case 24:
+#line 57 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 170;
+}}
+	break;
+	case 25:
+#line 110 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 197;
+   buf->data[buf->size++] = 170;
+}}
+	break;
+	case 26:
+#line 110 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 197;
+   buf->data[buf->size++] = 170;
+}}
+	break;
+	case 27:
+#line 44 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 197;
+   buf->data[buf->size++] = 154;
+}}
+	break;
+	case 28:
+#line 63 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 129;
+}}
+	break;
+	case 29:
+#line 8 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 133;
+}}
+	break;
+	case 30:
+#line 218 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 171;
+}}
+	break;
+	case 31:
+#line 170 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 197;
+   buf->data[buf->size++] = 171;
+}}
+	break;
+	case 32:
+#line 15 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 197;
+   buf->data[buf->size++] = 155;
+}}
+	break;
+	case 33:
+#line 132 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 145;
+}}
+	break;
+	case 34:
+#line 231 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 177;
+}}
+	break;
+	case 35:
+#line 125 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 129;
+}}
+	break;
+	case 36:
+#line 278 "skt_translit_velthuis_iastc.rl"
+	{te = p+1;{
+      skt_buf_grow(buf, 1);
+      buf->data[buf->size++] = *p;
+   }}
+	break;
+	case 37:
+#line 50 "skt_translit_velthuis_iastc.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 76;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 165;
+}}
+	break;
+	case 38:
+#line 37 "skt_translit_velthuis_iastc.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 82;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 165;
+}}
+	break;
+	case 39:
+#line 176 "skt_translit_velthuis_iastc.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 108;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 165;
+}}
+	break;
+	case 40:
+#line 69 "skt_translit_velthuis_iastc.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 114;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 165;
+}}
+	break;
+	case 41:
+#line 278 "skt_translit_velthuis_iastc.rl"
+	{te = p;p--;{
+      skt_buf_grow(buf, 1);
+      buf->data[buf->size++] = *p;
+   }}
+	break;
+#line 560 "skt_translit_velthuis_iastc.ic"
+		}
+	}
+
+_again:
+	_acts = _skt_translit_velthuis_iastc_actions + _skt_translit_velthuis_iastc_to_state_actions[cs];
+	_nacts = (unsigned int) *_acts++;
+	while ( _nacts-- > 0 ) {
+		switch ( *_acts++ ) {
+	case 0:
+#line 1 "NONE"
+	{ts = 0;}
+	break;
+#line 573 "skt_translit_velthuis_iastc.ic"
+		}
+	}
+
+	if ( ++p != pe )
+		goto _resume;
+	_test_eof: {}
+	if ( p == eof )
+	{
+	if ( _skt_translit_velthuis_iastc_eof_trans[cs] > 0 ) {
+		_trans = _skt_translit_velthuis_iastc_eof_trans[cs] - 1;
+		goto _eof_trans;
+	}
+	}
+
+	}
+
+#line 299 "skt_translit_velthuis_iastc.rl"
+
+   skt_buf_truncate(buf, buf->size);
+}

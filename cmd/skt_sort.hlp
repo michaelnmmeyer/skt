@@ -1,0 +1,7 @@
+Usage: %s [file]
+Sort a list of IAST-encoded Sanskrit strings.
+
+Options:
+   -h, --help     print this message and exit
+
+If no file is given, the standard input is read.
