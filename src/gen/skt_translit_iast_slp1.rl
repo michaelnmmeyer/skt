@@ -4,54 +4,55 @@ machine skt_translit_iast_slp1;
 
 alphtype unsigned char;
 
-# Y
+# /U
 action A0 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 89;
-}
-# ^U
-action A1 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 94;
-   buf->data[buf->size++] = 85;
-}
-# ^x
-action A2 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 94;
-   buf->data[buf->size++] = 120;
-}
-# P
-action A3 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 80;
-}
-# ^A
-action A4 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 94;
-   buf->data[buf->size++] = 65;
-}
-# e
-action A5 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 101;
-}
-# /u
-action A6 {
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
-   buf->data[buf->size++] = 117;
+   buf->data[buf->size++] = 85;
 }
-# W
+# ..
+action A1 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 46;
+   buf->data[buf->size++] = 46;
+}
+# /F
+action A2 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 47;
+   buf->data[buf->size++] = 70;
+}
+# ^I
+action A3 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 94;
+   buf->data[buf->size++] = 73;
+}
+# t
+action A4 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 116;
+}
+# ^a
+action A5 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 94;
+   buf->data[buf->size++] = 97;
+}
+# q
+action A6 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 113;
+}
+# I
 action A7 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 87;
+   buf->data[buf->size++] = 73;
 }
-# E
+# D
 action A8 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 69;
+   buf->data[buf->size++] = 68;
 }
 # /E
 action A9 {
@@ -59,577 +60,576 @@ action A9 {
    buf->data[buf->size++] = 47;
    buf->data[buf->size++] = 69;
 }
-# S
+# B
 action A10 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 83;
+   buf->data[buf->size++] = 66;
 }
-# ^I
+# u
 action A11 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 94;
-   buf->data[buf->size++] = 73;
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 117;
 }
-# I
+# M
 action A12 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 73;
+   buf->data[buf->size++] = 77;
 }
-# .
+# L
 action A13 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 46;
+   buf->data[buf->size++] = 76;
 }
-# /X
+# U
 action A14 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 47;
-   buf->data[buf->size++] = 88;
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 85;
+}
+# F
+action A15 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 70;
+}
+# Q
+action A16 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 81;
 }
 # /e
-action A15 {
+action A17 {
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
    buf->data[buf->size++] = 101;
 }
-# C
-action A16 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 67;
-}
-# D
-action A17 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 68;
-}
-# ^O
+# Y
 action A18 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 94;
-   buf->data[buf->size++] = 79;
-}
-# T
-action A19 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 84;
-}
-# /a
-action A20 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 47;
-   buf->data[buf->size++] = 97;
-}
-# X
-action A21 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 88;
-}
-# /o
-action A22 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 47;
-   buf->data[buf->size++] = 111;
-}
-# ^u
-action A23 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 94;
-   buf->data[buf->size++] = 117;
-}
-# q
-action A24 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 113;
-}
-# O
-action A25 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 79;
-}
-# N
-action A26 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 78;
-}
-# /F
-action A27 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 47;
-   buf->data[buf->size++] = 70;
-}
-# G
-action A28 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 71;
-}
-# d
-action A29 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 100;
-}
-# R
-action A30 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 82;
-}
-# b
-action A31 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 98;
+   buf->data[buf->size++] = 89;
 }
 # ^E
-action A32 {
+action A19 {
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
    buf->data[buf->size++] = 69;
 }
+# f
+action A20 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 102;
+}
+# ^i
+action A21 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 94;
+   buf->data[buf->size++] = 105;
+}
+# /f
+action A22 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 47;
+   buf->data[buf->size++] = 102;
+}
+# s
+action A23 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 115;
+}
+# g
+action A24 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 103;
+}
+# p
+action A25 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 112;
+}
+# k
+action A26 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 107;
+}
+# A
+action A27 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 65;
+}
+# y
+action A28 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 121;
+}
+# w
+action A29 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 119;
+}
+# G
+action A30 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 71;
+}
+# ^f
+action A31 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 94;
+   buf->data[buf->size++] = 102;
+}
 # /x
-action A33 {
+action A32 {
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
    buf->data[buf->size++] = 120;
 }
-# B
-action A34 {
+# P
+action A33 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 66;
+   buf->data[buf->size++] = 80;
 }
-# x
+# /I
+action A34 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 47;
+   buf->data[buf->size++] = 73;
+}
+# J
 action A35 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 120;
+   buf->data[buf->size++] = 74;
 }
-# r
+# ^A
 action A36 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 114;
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 94;
+   buf->data[buf->size++] = 65;
 }
-# L
+# z
 action A37 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 76;
-}
-# ..
-action A38 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 46;
-   buf->data[buf->size++] = 46;
+   buf->data[buf->size++] = 122;
 }
 # /i
-action A39 {
+action A38 {
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
    buf->data[buf->size++] = 105;
 }
-# /f
+# C
+action A39 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 67;
+}
+# T
 action A40 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 47;
-   buf->data[buf->size++] = 102;
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 84;
+}
+# X
+action A41 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 88;
 }
 # K
-action A41 {
+action A42 {
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 75;
 }
-# w
-action A42 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 119;
-}
-# Q
+# /A
 action A43 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 81;
-}
-# s
-action A44 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 115;
-}
-# z
-action A45 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 122;
-}
-# F
-action A46 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 70;
-}
-# u
-action A47 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 117;
-}
-# f
-action A48 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 102;
-}
-# /O
-action A49 {
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
+   buf->data[buf->size++] = 65;
+}
+# h
+action A44 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 104;
+}
+# |
+action A45 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 124;
+}
+# N
+action A46 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 78;
+}
+# ^F
+action A47 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 94;
+   buf->data[buf->size++] = 70;
+}
+# E
+action A48 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 69;
+}
+# W
+action A49 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 87;
+}
+# x
+action A50 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 120;
+}
+# ^O
+action A51 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 94;
    buf->data[buf->size++] = 79;
 }
 # ^o
-action A50 {
+action A52 {
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
    buf->data[buf->size++] = 111;
 }
-# n
-action A51 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 110;
-}
-# a
-action A52 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 97;
-}
-# t
+# /X
 action A53 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 116;
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 47;
+   buf->data[buf->size++] = 88;
 }
-# H
+# o
 action A54 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 72;
+   buf->data[buf->size++] = 111;
 }
-# k
+# c
 action A55 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 107;
+   buf->data[buf->size++] = 99;
 }
-# v
+# m
 action A56 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 118;
+   buf->data[buf->size++] = 109;
 }
-# ^F
+# S
 action A57 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 94;
-   buf->data[buf->size++] = 70;
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 83;
 }
-# J
+# O
 action A58 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 74;
+   buf->data[buf->size++] = 79;
 }
-# |
+# ^X
 action A59 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 124;
-}
-# ^e
-action A60 {
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
-   buf->data[buf->size++] = 101;
+   buf->data[buf->size++] = 88;
+}
+# /O
+action A60 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 47;
+   buf->data[buf->size++] = 79;
 }
 # i
 action A61 {
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 105;
 }
-# A
+# ~
 action A62 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 65;
+   buf->data[buf->size++] = 126;
 }
-# c
+# ^x
 action A63 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 99;
-}
-# y
-action A64 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 121;
-}
-# M
-action A65 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 77;
-}
-# h
-action A66 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 104;
-}
-# ^i
-action A67 {
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
-   buf->data[buf->size++] = 105;
-}
-# /U
-action A68 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 47;
-   buf->data[buf->size++] = 85;
-}
-# /A
-action A69 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 47;
-   buf->data[buf->size++] = 65;
-}
-# U
-action A70 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 85;
-}
-# ^X
-action A71 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 94;
-   buf->data[buf->size++] = 88;
-}
-# p
-action A72 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 112;
-}
-# o
-action A73 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 111;
-}
-# ^a
-action A74 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 94;
-   buf->data[buf->size++] = 97;
-}
-# m
-action A75 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 109;
-}
-# /I
-action A76 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 47;
-   buf->data[buf->size++] = 73;
+   buf->data[buf->size++] = 120;
 }
 # j
-action A77 {
+action A64 {
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 106;
 }
+# ^u
+action A65 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 94;
+   buf->data[buf->size++] = 117;
+}
+# H
+action A66 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 72;
+}
+# .
+action A67 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 46;
+}
+# /a
+action A68 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 47;
+   buf->data[buf->size++] = 97;
+}
+# r
+action A69 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 114;
+}
+# ^U
+action A70 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 94;
+   buf->data[buf->size++] = 85;
+}
+# R
+action A71 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 82;
+}
+# v
+action A72 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 118;
+}
+# /u
+action A73 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 47;
+   buf->data[buf->size++] = 117;
+}
+# ^e
+action A74 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 94;
+   buf->data[buf->size++] = 101;
+}
+# n
+action A75 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 110;
+}
 # /L
-action A78 {
+action A76 {
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
    buf->data[buf->size++] = 76;
 }
-# ^f
-action A79 {
+# /o
+action A77 {
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 94;
-   buf->data[buf->size++] = 102;
+   buf->data[buf->size++] = 47;
+   buf->data[buf->size++] = 111;
 }
-# ~
+# a
+action A78 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 97;
+}
+# d
+action A79 {
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = 100;
+}
+# e
 action A80 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 126;
+   buf->data[buf->size++] = 101;
 }
-# g
+# b
 action A81 {
    skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = 103;
+   buf->data[buf->size++] = 98;
 }
 
 
 
 main := |*
-   "A" => A52; # a
-   "AI" => A8; # E
-   "AU" => A25; # O
-   "Ai" => A8; # E
-   "Au" => A25; # O
-   "AÌ" => A32; # ^E
+   "A" => A78; # a
+   "AI" => A48; # E
+   "AU" => A58; # O
+   "Ai" => A48; # E
+   "Au" => A58; # O
+   "AÌ" => A19; # ^E
    "AÍ" => A9; # /E
-   "AÙ" => A18; # ^O
-   "AÚ" => A49; # /O
-   "Aì" => A32; # ^E
+   "AÙ" => A51; # ^O
+   "AÚ" => A60; # /O
+   "Aì" => A19; # ^E
    "Aí" => A9; # /E
-   "Aù" => A18; # ^O
-   "Aú" => A49; # /O
-   "B" => A31; # b
-   "BH" => A34; # B
-   "Bh" => A34; # B
-   "C" => A63; # c
-   "CH" => A16; # C
-   "Ch" => A16; # C
-   "D" => A29; # d
-   "DH" => A17; # D
-   "Dh" => A17; # D
-   "E" => A5; # e
-   "G" => A81; # g
-   "GH" => A28; # G
-   "Gh" => A28; # G
-   "H" => A66; # h
+   "Aù" => A51; # ^O
+   "Aú" => A60; # /O
+   "B" => A81; # b
+   "BH" => A10; # B
+   "Bh" => A10; # B
+   "C" => A55; # c
+   "CH" => A39; # C
+   "Ch" => A39; # C
+   "D" => A79; # d
+   "DH" => A8; # D
+   "Dh" => A8; # D
+   "E" => A80; # e
+   "G" => A24; # g
+   "GH" => A30; # G
+   "Gh" => A30; # G
+   "H" => A44; # h
    "I" => A61; # i
-   "J" => A77; # j
-   "JH" => A58; # J
-   "Jh" => A58; # J
-   "K" => A55; # k
-   "KH" => A41; # K
-   "Kh" => A41; # K
-   "L" => A78; # /L
-   "L̥" => A35; # x
-   "L̥̄" => A21; # X
-   "M" => A75; # m
-   "N" => A51; # n
-   "O" => A73; # o
-   "P" => A72; # p
-   "PH" => A3; # P
-   "Ph" => A3; # P
-   "R" => A36; # r
-   "R̥" => A48; # f
-   "R̥̄" => A46; # F
-   "S" => A44; # s
-   "T" => A53; # t
-   "TH" => A19; # T
-   "Th" => A19; # T
-   "U" => A47; # u
-   "V" => A56; # v
-   "Y" => A64; # y
-   "aI" => A8; # E
-   "aU" => A25; # O
-   "ai" => A8; # E
-   "au" => A25; # O
-   "aÌ" => A32; # ^E
+   "J" => A64; # j
+   "JH" => A35; # J
+   "Jh" => A35; # J
+   "K" => A26; # k
+   "KH" => A42; # K
+   "Kh" => A42; # K
+   "L" => A76; # /L
+   "L̥" => A50; # x
+   "L̥̄" => A41; # X
+   "M" => A56; # m
+   "N" => A75; # n
+   "O" => A54; # o
+   "P" => A25; # p
+   "PH" => A33; # P
+   "Ph" => A33; # P
+   "R" => A69; # r
+   "R̥" => A20; # f
+   "R̥̄" => A15; # F
+   "S" => A23; # s
+   "T" => A4; # t
+   "TH" => A40; # T
+   "Th" => A40; # T
+   "U" => A11; # u
+   "V" => A72; # v
+   "Y" => A28; # y
+   "aI" => A48; # E
+   "aU" => A58; # O
+   "ai" => A48; # E
+   "au" => A58; # O
+   "aÌ" => A19; # ^E
    "aÍ" => A9; # /E
-   "aÙ" => A18; # ^O
-   "aÚ" => A49; # /O
-   "aì" => A32; # ^E
+   "aÙ" => A51; # ^O
+   "aÚ" => A60; # /O
+   "aì" => A19; # ^E
    "aí" => A9; # /E
-   "aù" => A18; # ^O
-   "aú" => A49; # /O
-   "bH" => A34; # B
-   "bh" => A34; # B
-   "cH" => A16; # C
-   "ch" => A16; # C
-   "dH" => A17; # D
-   "dh" => A17; # D
-   "gH" => A28; # G
-   "gh" => A28; # G
-   "jH" => A58; # J
-   "jh" => A58; # J
-   "kH" => A41; # K
-   "kh" => A41; # K
-   "l̥" => A35; # x
-   "l̥̄" => A21; # X
-   "pH" => A3; # P
-   "ph" => A3; # P
-   "r̥" => A48; # f
-   "r̥̄" => A46; # F
-   "tH" => A19; # T
-   "th" => A19; # T
-   "|" => A13; # .
-   "||" => A38; # ..
-   "À" => A74; # ^a
-   "Á" => A20; # /a
-   "È" => A60; # ^e
-   "É" => A15; # /e
-   "Ì" => A67; # ^i
-   "Í" => A39; # /i
-   "Ñ" => A0; # Y
-   "Ò" => A50; # ^o
-   "Ó" => A22; # /o
-   "Ù" => A23; # ^u
-   "Ú" => A6; # /u
-   "à" => A74; # ^a
-   "á" => A20; # /a
-   "è" => A60; # ^e
-   "é" => A15; # /e
-   "ì" => A67; # ^i
-   "í" => A39; # /i
-   "ñ" => A0; # Y
-   "ò" => A50; # ^o
-   "ó" => A22; # /o
-   "ù" => A23; # ^u
-   "ú" => A6; # /u
-   "Ā" => A62; # A
-   "Ā̀" => A4; # ^A
-   "Ā́" => A69; # /A
-   "ā" => A62; # A
-   "ā̀" => A4; # ^A
-   "ā́" => A69; # /A
-   "Ī" => A12; # I
-   "Ī̀" => A11; # ^I
-   "Ī́" => A76; # /I
-   "ī" => A12; # I
-   "ī̀" => A11; # ^I
-   "ī́" => A76; # /I
-   "Ś" => A10; # S
-   "ś" => A10; # S
-   "Ū" => A70; # U
-   "Ū̀" => A1; # ^U
-   "Ū́" => A68; # /U
-   "ū" => A70; # U
-   "ū̀" => A1; # ^U
-   "ū́" => A68; # /U
-   "̃" => A80; # ~
-   "Ḍ" => A24; # q
-   "ḌH" => A43; # Q
-   "Ḍh" => A43; # Q
-   "ḍ" => A24; # q
-   "ḍH" => A43; # Q
-   "ḍh" => A43; # Q
-   "Ḥ" => A54; # H
-   "ḥ" => A54; # H
-   "Ḷ" => A35; # x
-   "ḶH" => A59; # |
-   "Ḷh" => A59; # |
-   "Ḷ̀" => A2; # ^x
-   "Ḷ́" => A33; # /x
-   "ḷ" => A35; # x
-   "ḷH" => A59; # |
-   "ḷh" => A59; # |
-   "ḷ̀" => A2; # ^x
-   "ḷ́" => A33; # /x
-   "Ḹ" => A21; # X
-   "Ḹ̀" => A71; # ^X
-   "Ḹ́" => A14; # /X
-   "ḹ" => A21; # X
-   "ḹ̀" => A71; # ^X
-   "ḹ́" => A14; # /X
-   "Ḻ" => A37; # L
-   "ḻ" => A37; # L
-   "Ṃ" => A65; # M
-   "ṃ" => A65; # M
-   "Ṅ" => A26; # N
-   "ṅ" => A26; # N
-   "Ṇ" => A30; # R
-   "ṇ" => A30; # R
-   "Ṛ" => A48; # f
-   "Ṛ̀" => A79; # ^f
-   "Ṛ́" => A40; # /f
-   "ṛ" => A48; # f
-   "ṛ̀" => A79; # ^f
-   "ṛ́" => A40; # /f
-   "Ṝ" => A46; # F
-   "Ṝ̀" => A57; # ^F
-   "Ṝ́" => A27; # /F
-   "ṝ" => A46; # F
-   "ṝ̀" => A57; # ^F
-   "ṝ́" => A27; # /F
-   "Ṣ" => A45; # z
-   "ṣ" => A45; # z
-   "Ṭ" => A42; # w
-   "ṬH" => A7; # W
-   "Ṭh" => A7; # W
-   "ṭ" => A42; # w
-   "ṭH" => A7; # W
-   "ṭh" => A7; # W
+   "aù" => A51; # ^O
+   "aú" => A60; # /O
+   "bH" => A10; # B
+   "bh" => A10; # B
+   "cH" => A39; # C
+   "ch" => A39; # C
+   "dH" => A8; # D
+   "dh" => A8; # D
+   "gH" => A30; # G
+   "gh" => A30; # G
+   "jH" => A35; # J
+   "jh" => A35; # J
+   "kH" => A42; # K
+   "kh" => A42; # K
+   "l̥" => A50; # x
+   "l̥̄" => A41; # X
+   "pH" => A33; # P
+   "ph" => A33; # P
+   "r̥" => A20; # f
+   "r̥̄" => A15; # F
+   "tH" => A40; # T
+   "th" => A40; # T
+   "|" => A67; # .
+   "||" => A1; # ..
+   "À" => A5; # ^a
+   "Á" => A68; # /a
+   "È" => A74; # ^e
+   "É" => A17; # /e
+   "Ì" => A21; # ^i
+   "Í" => A38; # /i
+   "Ñ" => A18; # Y
+   "Ò" => A52; # ^o
+   "Ó" => A77; # /o
+   "Ù" => A65; # ^u
+   "Ú" => A73; # /u
+   "à" => A5; # ^a
+   "á" => A68; # /a
+   "è" => A74; # ^e
+   "é" => A17; # /e
+   "ì" => A21; # ^i
+   "í" => A38; # /i
+   "ñ" => A18; # Y
+   "ò" => A52; # ^o
+   "ó" => A77; # /o
+   "ù" => A65; # ^u
+   "ú" => A73; # /u
+   "Ā" => A27; # A
+   "Ā̀" => A36; # ^A
+   "Ā́" => A43; # /A
+   "ā" => A27; # A
+   "ā̀" => A36; # ^A
+   "ā́" => A43; # /A
+   "Ī" => A7; # I
+   "Ī̀" => A3; # ^I
+   "Ī́" => A34; # /I
+   "ī" => A7; # I
+   "ī̀" => A3; # ^I
+   "ī́" => A34; # /I
+   "Ś" => A57; # S
+   "ś" => A57; # S
+   "Ū" => A14; # U
+   "Ū̀" => A70; # ^U
+   "Ū́" => A0; # /U
+   "ū" => A14; # U
+   "ū̀" => A70; # ^U
+   "ū́" => A0; # /U
+   "̃" => A62; # ~
+   "Ḍ" => A6; # q
+   "ḌH" => A16; # Q
+   "Ḍh" => A16; # Q
+   "ḍ" => A6; # q
+   "ḍH" => A16; # Q
+   "ḍh" => A16; # Q
+   "Ḥ" => A66; # H
+   "ḥ" => A66; # H
+   "Ḷ" => A50; # x
+   "ḶH" => A45; # |
+   "Ḷh" => A45; # |
+   "Ḷ̀" => A63; # ^x
+   "Ḷ́" => A32; # /x
+   "ḷ" => A50; # x
+   "ḷH" => A45; # |
+   "ḷh" => A45; # |
+   "ḷ̀" => A63; # ^x
+   "ḷ́" => A32; # /x
+   "Ḹ" => A41; # X
+   "Ḹ̀" => A59; # ^X
+   "Ḹ́" => A53; # /X
+   "ḹ" => A41; # X
+   "ḹ̀" => A59; # ^X
+   "ḹ́" => A53; # /X
+   "Ḻ" => A13; # L
+   "ḻ" => A13; # L
+   "Ṃ" => A12; # M
+   "ṃ" => A12; # M
+   "Ṅ" => A46; # N
+   "ṅ" => A46; # N
+   "Ṇ" => A71; # R
+   "ṇ" => A71; # R
+   "Ṛ" => A20; # f
+   "Ṛ̀" => A31; # ^f
+   "Ṛ́" => A22; # /f
+   "ṛ" => A20; # f
+   "ṛ̀" => A31; # ^f
+   "ṛ́" => A22; # /f
+   "Ṝ" => A15; # F
+   "Ṝ̀" => A47; # ^F
+   "Ṝ́" => A2; # /F
+   "ṝ" => A15; # F
+   "ṝ̀" => A47; # ^F
+   "ṝ́" => A2; # /F
+   "Ṣ" => A37; # z
+   "ṣ" => A37; # z
+   "Ṭ" => A29; # w
+   "ṬH" => A49; # W
+   "Ṭh" => A49; # W
+   "ṭ" => A29; # w
+   "ṭH" => A49; # W
+   "ṭh" => A49; # W
    any => {
       skt_buf_grow(buf, 1);
       buf->data[buf->size++] = *p;

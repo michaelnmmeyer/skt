@@ -4,74 +4,74 @@ machine skt_translit_iastc_iast;
 
 alphtype unsigned char;
 
-# Ṝ
-action A0 {
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 225;
-   buf->data[buf->size++] = 185;
-   buf->data[buf->size++] = 156;
-}
-# Ṛ
-action A1 {
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 225;
-   buf->data[buf->size++] = 185;
-   buf->data[buf->size++] = 154;
-}
 # ṝ
-action A2 {
+action A0 {
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 185;
    buf->data[buf->size++] = 157;
 }
-# Ḷ
-action A3 {
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 225;
-   buf->data[buf->size++] = 184;
-   buf->data[buf->size++] = 182;
-}
-# ḹ
-action A4 {
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 225;
-   buf->data[buf->size++] = 184;
-   buf->data[buf->size++] = 185;
-}
-# Ḹ
-action A5 {
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 225;
-   buf->data[buf->size++] = 184;
-   buf->data[buf->size++] = 184;
-}
 # ṛ
-action A6 {
+action A1 {
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 185;
    buf->data[buf->size++] = 155;
 }
 # ḷ
-action A7 {
+action A2 {
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 184;
    buf->data[buf->size++] = 183;
 }
+# ḹ
+action A3 {
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 185;
+}
+# Ḹ
+action A4 {
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 184;
+}
+# Ṛ
+action A5 {
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 154;
+}
+# Ḷ
+action A6 {
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 182;
+}
+# Ṝ
+action A7 {
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 156;
+}
 
 
 
 main := |*
-   "L̥" => A3; # Ḷ
-   "L̥̄" => A5; # Ḹ
-   "R̥" => A1; # Ṛ
-   "R̥̄" => A0; # Ṝ
-   "l̥" => A7; # ḷ
-   "l̥̄" => A4; # ḹ
-   "r̥" => A6; # ṛ
-   "r̥̄" => A2; # ṝ
+   "L̥" => A6; # Ḷ
+   "L̥̄" => A4; # Ḹ
+   "R̥" => A5; # Ṛ
+   "R̥̄" => A7; # Ṝ
+   "l̥" => A2; # ḷ
+   "l̥̄" => A3; # ḹ
+   "r̥" => A1; # ṛ
+   "r̥̄" => A0; # ṝ
    any => {
       skt_buf_grow(buf, 1);
       buf->data[buf->size++] = *p;

@@ -4,66 +4,66 @@ machine skt_translit_velthuis_iastc;
 
 alphtype unsigned char;
 
-# ṅ
+# Ñ
 action A0 {
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 225;
-   buf->data[buf->size++] = 185;
-   buf->data[buf->size++] = 133;
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 145;
 }
-# ś
+# Ā
 action A1 {
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 197;
-   buf->data[buf->size++] = 155;
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 128;
 }
-# ṣ
+# Ī
 action A2 {
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 225;
-   buf->data[buf->size++] = 185;
-   buf->data[buf->size++] = 163;
-}
-# r̥̄
-action A3 {
-   skt_buf_grow(buf, 5);
-   buf->data[buf->size++] = 114;
-   buf->data[buf->size++] = 204;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 204;
-   buf->data[buf->size++] = 132;
-}
-# R̥
-action A4 {
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 82;
-   buf->data[buf->size++] = 204;
-   buf->data[buf->size++] = 165;
-}
-# Ś
-action A5 {
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 197;
-   buf->data[buf->size++] = 154;
+   buf->data[buf->size++] = 196;
+   buf->data[buf->size++] = 170;
 }
 # L̥
-action A6 {
+action A3 {
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 76;
    buf->data[buf->size++] = 204;
    buf->data[buf->size++] = 165;
 }
-# Ī
-action A7 {
+# Ś
+action A4 {
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 196;
-   buf->data[buf->size++] = 170;
+   buf->data[buf->size++] = 197;
+   buf->data[buf->size++] = 154;
 }
-# ā
+# ṃ
+action A5 {
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 131;
+}
+# L̥̄
+action A6 {
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 76;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 132;
+}
+# Ṭ
+action A7 {
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 172;
+}
+# ḥ
 action A8 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 196;
-   buf->data[buf->size++] = 129;
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 165;
 }
 # r̥
 action A9 {
@@ -72,48 +72,24 @@ action A9 {
    buf->data[buf->size++] = 204;
    buf->data[buf->size++] = 165;
 }
-# Ḍ
+# l̥̄
 action A10 {
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 225;
-   buf->data[buf->size++] = 184;
-   buf->data[buf->size++] = 140;
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 108;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 132;
 }
-# Ṇ
+# ḍ
 action A11 {
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
-   buf->data[buf->size++] = 185;
-   buf->data[buf->size++] = 134;
-}
-# Ā
-action A12 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 196;
-   buf->data[buf->size++] = 128;
-}
-# Ṃ
-action A13 {
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 225;
-   buf->data[buf->size++] = 185;
-   buf->data[buf->size++] = 130;
-}
-# Ṭ
-action A14 {
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 225;
-   buf->data[buf->size++] = 185;
-   buf->data[buf->size++] = 172;
-}
-# Ū
-action A15 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 197;
-   buf->data[buf->size++] = 170;
+   buf->data[buf->size++] = 184;
+   buf->data[buf->size++] = 141;
 }
 # R̥̄
-action A16 {
+action A12 {
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 82;
    buf->data[buf->size++] = 204;
@@ -121,50 +97,74 @@ action A16 {
    buf->data[buf->size++] = 204;
    buf->data[buf->size++] = 132;
 }
-# ṁ
+# l̥
+action A13 {
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 108;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 165;
+}
+# Ṅ
+action A14 {
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 132;
+}
+# ṇ
+action A15 {
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 135;
+}
+# Ṃ
+action A16 {
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 130;
+}
+# Ṇ
 action A17 {
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 134;
+}
+# ṭ
+action A18 {
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 173;
+}
+# ā
+action A19 {
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 196;
    buf->data[buf->size++] = 129;
 }
-# Ñ
-action A18 {
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 195;
-   buf->data[buf->size++] = 145;
-}
-# L̥̄
-action A19 {
-   skt_buf_grow(buf, 5);
-   buf->data[buf->size++] = 76;
-   buf->data[buf->size++] = 204;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 204;
-   buf->data[buf->size++] = 132;
-}
-# ḍ
+# Ḍ
 action A20 {
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 184;
-   buf->data[buf->size++] = 141;
+   buf->data[buf->size++] = 140;
 }
-# l̥̄
+# ṣ
 action A21 {
-   skt_buf_grow(buf, 5);
-   buf->data[buf->size++] = 108;
-   buf->data[buf->size++] = 204;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 204;
-   buf->data[buf->size++] = 132;
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 225;
+   buf->data[buf->size++] = 185;
+   buf->data[buf->size++] = 163;
 }
-# ṃ
+# Ṣ
 action A22 {
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 185;
-   buf->data[buf->size++] = 131;
+   buf->data[buf->size++] = 162;
 }
 # ū
 action A23 {
@@ -172,47 +172,47 @@ action A23 {
    buf->data[buf->size++] = 197;
    buf->data[buf->size++] = 171;
 }
-# l̥
+# r̥̄
 action A24 {
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 108;
+   skt_buf_grow(buf, 5);
+   buf->data[buf->size++] = 114;
    buf->data[buf->size++] = 204;
    buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 132;
 }
-# ḥ
+# Ū
 action A25 {
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 225;
-   buf->data[buf->size++] = 184;
-   buf->data[buf->size++] = 165;
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 197;
+   buf->data[buf->size++] = 170;
 }
-# ṭ
+# ñ
 action A26 {
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 225;
-   buf->data[buf->size++] = 185;
-   buf->data[buf->size++] = 173;
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 195;
+   buf->data[buf->size++] = 177;
 }
-# ṇ
+# ṅ
 action A27 {
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 185;
-   buf->data[buf->size++] = 135;
-}
-# Ṅ
-action A28 {
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 225;
-   buf->data[buf->size++] = 185;
-   buf->data[buf->size++] = 132;
+   buf->data[buf->size++] = 133;
 }
 # Ḥ
-action A29 {
+action A28 {
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 184;
    buf->data[buf->size++] = 164;
+}
+# R̥
+action A29 {
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 82;
+   buf->data[buf->size++] = 204;
+   buf->data[buf->size++] = 165;
 }
 # ī
 action A30 {
@@ -220,61 +220,61 @@ action A30 {
    buf->data[buf->size++] = 196;
    buf->data[buf->size++] = 171;
 }
-# Ṣ
+# ṁ
 action A31 {
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 185;
-   buf->data[buf->size++] = 162;
+   buf->data[buf->size++] = 129;
 }
-# ñ
+# ś
 action A32 {
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 195;
-   buf->data[buf->size++] = 177;
+   buf->data[buf->size++] = 197;
+   buf->data[buf->size++] = 155;
 }
 
 
 
 main := |*
-   ".D" => A10; # Ḍ
-   ".H" => A29; # Ḥ
-   ".L" => A6; # L̥
-   ".LL" => A19; # L̥̄
-   ".Ll" => A19; # L̥̄
-   ".M" => A13; # Ṃ
-   ".N" => A11; # Ṇ
-   ".R" => A4; # R̥
-   ".RR" => A16; # R̥̄
-   ".Rr" => A16; # R̥̄
-   ".S" => A31; # Ṣ
-   ".T" => A14; # Ṭ
-   ".d" => A20; # ḍ
-   ".h" => A25; # ḥ
-   ".l" => A24; # l̥
-   ".ll" => A21; # l̥̄
-   ".m" => A22; # ṃ
-   ".n" => A27; # ṇ
+   ".D" => A20; # Ḍ
+   ".H" => A28; # Ḥ
+   ".L" => A3; # L̥
+   ".LL" => A6; # L̥̄
+   ".Ll" => A6; # L̥̄
+   ".M" => A16; # Ṃ
+   ".N" => A17; # Ṇ
+   ".R" => A29; # R̥
+   ".RR" => A12; # R̥̄
+   ".Rr" => A12; # R̥̄
+   ".S" => A22; # Ṣ
+   ".T" => A7; # Ṭ
+   ".d" => A11; # ḍ
+   ".h" => A8; # ḥ
+   ".l" => A13; # l̥
+   ".ll" => A10; # l̥̄
+   ".m" => A5; # ṃ
+   ".n" => A15; # ṇ
    ".r" => A9; # r̥
-   ".rr" => A3; # r̥̄
-   ".s" => A2; # ṣ
-   ".t" => A26; # ṭ
-   "AA" => A12; # Ā
-   "Aa" => A12; # Ā
-   "F" => A28; # Ṅ
-   "II" => A7; # Ī
-   "Ii" => A7; # Ī
-   "UU" => A15; # Ū
-   "Uu" => A15; # Ū
-   "Z" => A5; # Ś
-   "aa" => A8; # ā
-   "f" => A0; # ṅ
+   ".rr" => A24; # r̥̄
+   ".s" => A21; # ṣ
+   ".t" => A18; # ṭ
+   "AA" => A1; # Ā
+   "Aa" => A1; # Ā
+   "F" => A14; # Ṅ
+   "II" => A2; # Ī
+   "Ii" => A2; # Ī
+   "UU" => A25; # Ū
+   "Uu" => A25; # Ū
+   "Z" => A4; # Ś
+   "aa" => A19; # ā
+   "f" => A27; # ṅ
    "ii" => A30; # ī
    "uu" => A23; # ū
-   "z" => A1; # ś
-   "~N" => A18; # Ñ
-   "~n" => A32; # ñ
-   "~~" => A17; # ṁ
+   "z" => A32; # ś
+   "~N" => A0; # Ñ
+   "~n" => A26; # ñ
+   "~~" => A31; # ṁ
    any => {
       skt_buf_grow(buf, 1);
       buf->data[buf->size++] = *p;

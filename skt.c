@@ -1,7 +1,11 @@
-#include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
-#include <stdint.h>
+#ifndef SKT_BUF_H
+#define SKT_BUF_H
+
+#include <stddef.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <assert.h>
 #ifndef SKT_H
 #define SKT_H
 
@@ -71,13 +75,6 @@ skt_translit skt_translit_func(const char *input_scheme,
                                const char *output_scheme);
 
 #endif
-#ifndef SKT_BUF_H
-#define SKT_BUF_H
-
-#include <stddef.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <assert.h>
 
 void skt_buf_grow(struct skt_buf *buf, size_t incr);
 
@@ -117,6 +114,197 @@ static inline void skt_buf_truncate(struct skt_buf *buf, size_t size)
 #define skt_buf_clear(buf) skt_buf_truncate(buf, 0)
 
 #endif
+#ifndef SKT_MEM_H
+#define SKT_MEM_H
+
+#include <stddef.h>
+#include <assert.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdnoreturn.h>
+
+noreturn void skt_fatal(const char *msg, ...);
+
+void *skt_malloc(size_t size)
+#ifdef ___GNUC__
+   __attribute__((malloc))
+#endif
+   ;
+
+void *skt_calloc(size_t nmemb, size_t size)
+#ifdef ___GNUC__
+   __attribute__((malloc))
+#endif
+   ;
+
+void *skt_realloc(void *mem, size_t size);
+
+/* For reallocating arrays.
+ * data: the array proper.
+ * size: current number of elements.
+ * alloc: current allocated memory (must be initialized to 0).
+ * more: number of elements to reserve.
+ * init: initial number of elements to allocate.
+ */
+#define SKT_GROW(data, size, alloc, more, init) do {                           \
+   size_t need = size + more;                                                  \
+   if (need < size)                                                            \
+      skt_fatal("integer overflow");                                           \
+   if (need > alloc) {                                                         \
+      if (alloc) {                                                             \
+         alloc += alloc >> 1;                                                  \
+         if (alloc < need)                                                     \
+            alloc = need;                                                      \
+         if (alloc > SIZE_MAX / sizeof *data)                                  \
+            skt_fatal("integer overflow");                                     \
+         data = skt_realloc(data, alloc * sizeof *data);                       \
+      } else {                                                                 \
+         alloc = need < init ? init : need;                                    \
+         if (alloc > SIZE_MAX / sizeof *data)                                  \
+            skt_fatal("integer overflow");                                     \
+         data = skt_malloc(alloc * sizeof *data);                              \
+      }                                                                        \
+   }                                                                           \
+} while (0)
+
+#endif
+
+#define SKT_BUF_INIT_SIZE 16
+
+void skt_buf_grow(struct skt_buf *buf, size_t size)
+{
+   size_t need = buf->size + size + 1;
+   if (need <= buf->size)
+      skt_fatal("integer overflow");
+
+   if (need > buf->alloc) {
+      if (buf->alloc) {
+         buf->alloc += buf->alloc >> 1;
+         if (buf->alloc < need)
+            buf->alloc = need;
+         buf->data = skt_realloc(buf->data, buf->alloc);
+      } else {
+         buf->alloc = need < SKT_BUF_INIT_SIZE ? SKT_BUF_INIT_SIZE : need;
+         buf->data = skt_malloc(buf->alloc);
+      }
+   }
+}
+
+void skt_buf_fini(struct skt_buf *buf)
+{
+   if (buf->alloc)
+      free(buf->data);
+}
+
+void skt_buf_set(struct skt_buf *buf, const void *data, size_t size)
+{
+   skt_buf_clear(buf);
+   skt_buf_cat(buf, data, size);
+}
+
+void skt_buf_sets(struct skt_buf *buf, const char *str)
+{
+   skt_buf_set(buf, str, strlen(str));
+}
+
+void skt_buf_cat(struct skt_buf *buf, const void *data, size_t size)
+{
+   skt_buf_grow(buf, size);
+   memcpy(&buf->data[buf->size], data, size);
+   buf->data[buf->size += size] = '\0';
+}
+
+void skt_buf_catc(struct skt_buf *buf, int c)
+{
+   skt_buf_grow(buf, 1);
+   buf->data[buf->size++] = c;
+   buf->data[buf->size] = '\0';
+}
+
+void skt_buf_cats(struct skt_buf *buf, const char *str)
+{
+   skt_buf_cat(buf, str, strlen(str));
+}
+
+void skt_buf_printf(struct skt_buf *buf, const char *fmt, ...)
+{
+   va_list ap;
+   va_start(ap, fmt);
+   skt_buf_vprintf(buf, fmt, ap);
+   va_end(ap);
+}
+
+static size_t vsnprintf_unsigned(char *buf, size_t size,
+                                 const char *fmt, va_list ap)
+{
+   int len = vsnprintf(buf, size, fmt, ap);
+   return len < 0 ? 0 : len;
+}
+
+void skt_buf_vprintf(struct skt_buf *buf, const char *fmt, va_list ap)
+{
+   va_list copy;
+   va_copy(copy, ap);
+   size_t avail = buf->alloc - buf->size;
+   size_t size = vsnprintf_unsigned(&buf->data[buf->size], avail, fmt, copy);
+   va_end(copy);
+
+   if (size >= avail) {
+      skt_buf_grow(buf, size);
+      avail = buf->alloc - buf->size;
+      size = vsnprintf_unsigned(&buf->data[buf->size], avail, fmt, ap);
+   }
+   buf->size += size;
+}
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+
+noreturn void skt_fatal(const char *msg, ...)
+{
+   va_list ap;
+
+   fputs("skt: ", stderr);
+   va_start(ap, msg);
+   vfprintf(stderr, msg, ap);
+   va_end(ap);
+   putc('\n', stderr);
+   abort();
+}
+
+#define SKT_OOM() skt_fatal("out of memory")
+
+void *skt_malloc(size_t size)
+{
+   assert(size);
+   void *mem = malloc(size);
+   if (!mem)
+      SKT_OOM();
+   return mem;
+}
+
+void *skt_realloc(void *mem, size_t size)
+{
+   assert(size);
+   void *new = realloc(mem, size);
+   if (!new)
+      SKT_OOM();
+   return new;
+}
+
+void *skt_calloc(size_t nmemb, size_t size)
+{
+   assert(nmemb && size);
+   void *mem = calloc(nmemb, size);
+   if (!mem)
+      SKT_OOM();
+   return mem;
+}
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
 
 enum {
    IAST,
@@ -378,7 +566,7 @@ _eof_trans:
 		switch ( *_acts++ )
 		{
 	case 2:
-#line 383 "skt_translit_slp1_iast.rl"
+#line 38 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 124;
@@ -386,7 +574,7 @@ _eof_trans:
 }}
 	break;
 	case 3:
-#line 254 "skt_translit_slp1_iast.rl"
+#line 404 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 196;
@@ -396,7 +584,7 @@ _eof_trans:
 }}
 	break;
 	case 4:
-#line 106 "skt_translit_slp1_iast.rl"
+#line 438 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 97;
@@ -405,7 +593,7 @@ _eof_trans:
 }}
 	break;
 	case 5:
-#line 233 "skt_translit_slp1_iast.rl"
+#line 84 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -416,7 +604,7 @@ _eof_trans:
 }}
 	break;
 	case 6:
-#line 328 "skt_translit_slp1_iast.rl"
+#line 218 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 196;
@@ -426,14 +614,14 @@ _eof_trans:
 }}
 	break;
 	case 7:
-#line 113 "skt_translit_slp1_iast.rl"
+#line 254 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 76;
 }}
 	break;
 	case 8:
-#line 118 "skt_translit_slp1_iast.rl"
+#line 364 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 97;
@@ -442,7 +630,7 @@ _eof_trans:
 }}
 	break;
 	case 9:
-#line 423 "skt_translit_slp1_iast.rl"
+#line 246 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 197;
@@ -452,7 +640,7 @@ _eof_trans:
 }}
 	break;
 	case 10:
-#line 97 "skt_translit_slp1_iast.rl"
+#line 62 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -463,7 +651,7 @@ _eof_trans:
 }}
 	break;
 	case 11:
-#line 214 "skt_translit_slp1_iast.rl"
+#line 151 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -471,7 +659,7 @@ _eof_trans:
 }}
 	break;
 	case 12:
-#line 248 "skt_translit_slp1_iast.rl"
+#line 184 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -479,7 +667,7 @@ _eof_trans:
 }}
 	break;
 	case 13:
-#line 176 "skt_translit_slp1_iast.rl"
+#line 44 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -490,7 +678,7 @@ _eof_trans:
 }}
 	break;
 	case 14:
-#line 53 "skt_translit_slp1_iast.rl"
+#line 358 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -498,7 +686,7 @@ _eof_trans:
 }}
 	break;
 	case 15:
-#line 358 "skt_translit_slp1_iast.rl"
+#line 171 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -506,7 +694,7 @@ _eof_trans:
 }}
 	break;
 	case 16:
-#line 78 "skt_translit_slp1_iast.rl"
+#line 8 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -514,7 +702,7 @@ _eof_trans:
 }}
 	break;
 	case 17:
-#line 125 "skt_translit_slp1_iast.rl"
+#line 395 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -525,7 +713,7 @@ _eof_trans:
 }}
 	break;
 	case 18:
-#line 316 "skt_translit_slp1_iast.rl"
+#line 117 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 196;
@@ -533,7 +721,7 @@ _eof_trans:
 }}
 	break;
 	case 19:
-#line 417 "skt_translit_slp1_iast.rl"
+#line 389 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 98;
@@ -541,7 +729,7 @@ _eof_trans:
 }}
 	break;
 	case 20:
-#line 290 "skt_translit_slp1_iast.rl"
+#line 279 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 99;
@@ -549,7 +737,7 @@ _eof_trans:
 }}
 	break;
 	case 21:
-#line 72 "skt_translit_slp1_iast.rl"
+#line 240 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 100;
@@ -557,7 +745,7 @@ _eof_trans:
 }}
 	break;
 	case 22:
-#line 371 "skt_translit_slp1_iast.rl"
+#line 383 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 97;
@@ -565,7 +753,7 @@ _eof_trans:
 }}
 	break;
 	case 23:
-#line 410 "skt_translit_slp1_iast.rl"
+#line 419 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -574,7 +762,7 @@ _eof_trans:
 }}
 	break;
 	case 24:
-#line 377 "skt_translit_slp1_iast.rl"
+#line 332 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 103;
@@ -582,7 +770,7 @@ _eof_trans:
 }}
 	break;
 	case 25:
-#line 336 "skt_translit_slp1_iast.rl"
+#line 177 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -591,7 +779,7 @@ _eof_trans:
 }}
 	break;
 	case 26:
-#line 162 "skt_translit_slp1_iast.rl"
+#line 445 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 196;
@@ -599,7 +787,7 @@ _eof_trans:
 }}
 	break;
 	case 27:
-#line 8 "skt_translit_slp1_iast.rl"
+#line 352 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 106;
@@ -607,7 +795,7 @@ _eof_trans:
 }}
 	break;
 	case 28:
-#line 302 "skt_translit_slp1_iast.rl"
+#line 285 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 107;
@@ -615,7 +803,7 @@ _eof_trans:
 }}
 	break;
 	case 29:
-#line 389 "skt_translit_slp1_iast.rl"
+#line 157 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -624,7 +812,7 @@ _eof_trans:
 }}
 	break;
 	case 30:
-#line 277 "skt_translit_slp1_iast.rl"
+#line 137 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -633,7 +821,7 @@ _eof_trans:
 }}
 	break;
 	case 31:
-#line 437 "skt_translit_slp1_iast.rl"
+#line 412 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -642,7 +830,7 @@ _eof_trans:
 }}
 	break;
 	case 32:
-#line 431 "skt_translit_slp1_iast.rl"
+#line 318 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 97;
@@ -650,7 +838,7 @@ _eof_trans:
 }}
 	break;
 	case 33:
-#line 322 "skt_translit_slp1_iast.rl"
+#line 432 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 112;
@@ -658,7 +846,7 @@ _eof_trans:
 }}
 	break;
 	case 34:
-#line 402 "skt_translit_slp1_iast.rl"
+#line 324 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 225;
@@ -668,7 +856,7 @@ _eof_trans:
 }}
 	break;
 	case 35:
-#line 444 "skt_translit_slp1_iast.rl"
+#line 266 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -677,7 +865,7 @@ _eof_trans:
 }}
 	break;
 	case 36:
-#line 396 "skt_translit_slp1_iast.rl"
+#line 298 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 197;
@@ -685,7 +873,7 @@ _eof_trans:
 }}
 	break;
 	case 37:
-#line 227 "skt_translit_slp1_iast.rl"
+#line 111 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 116;
@@ -693,7 +881,7 @@ _eof_trans:
 }}
 	break;
 	case 38:
-#line 271 "skt_translit_slp1_iast.rl"
+#line 196 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 197;
@@ -701,7 +889,7 @@ _eof_trans:
 }}
 	break;
 	case 39:
-#line 350 "skt_translit_slp1_iast.rl"
+#line 129 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 225;
@@ -711,7 +899,7 @@ _eof_trans:
 }}
 	break;
 	case 40:
-#line 343 "skt_translit_slp1_iast.rl"
+#line 71 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -720,7 +908,7 @@ _eof_trans:
 }}
 	break;
 	case 41:
-#line 66 "skt_translit_slp1_iast.rl"
+#line 426 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -728,7 +916,7 @@ _eof_trans:
 }}
 	break;
 	case 42:
-#line 168 "skt_translit_slp1_iast.rl"
+#line 30 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 196;
@@ -738,7 +926,7 @@ _eof_trans:
 }}
 	break;
 	case 43:
-#line 142 "skt_translit_slp1_iast.rl"
+#line 14 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 97;
@@ -747,7 +935,7 @@ _eof_trans:
 }}
 	break;
 	case 44:
-#line 262 "skt_translit_slp1_iast.rl"
+#line 53 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -758,7 +946,7 @@ _eof_trans:
 }}
 	break;
 	case 45:
-#line 45 "skt_translit_slp1_iast.rl"
+#line 304 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 196;
@@ -768,7 +956,7 @@ _eof_trans:
 }}
 	break;
 	case 46:
-#line 90 "skt_translit_slp1_iast.rl"
+#line 144 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 97;
@@ -777,7 +965,7 @@ _eof_trans:
 }}
 	break;
 	case 47:
-#line 134 "skt_translit_slp1_iast.rl"
+#line 202 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 197;
@@ -787,7 +975,7 @@ _eof_trans:
 }}
 	break;
 	case 48:
-#line 14 "skt_translit_slp1_iast.rl"
+#line 21 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -798,7 +986,7 @@ _eof_trans:
 }}
 	break;
 	case 49:
-#line 284 "skt_translit_slp1_iast.rl"
+#line 338 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -806,7 +994,7 @@ _eof_trans:
 }}
 	break;
 	case 50:
-#line 156 "skt_translit_slp1_iast.rl"
+#line 273 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -814,7 +1002,7 @@ _eof_trans:
 }}
 	break;
 	case 51:
-#line 200 "skt_translit_slp1_iast.rl"
+#line 102 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -825,7 +1013,7 @@ _eof_trans:
 }}
 	break;
 	case 52:
-#line 296 "skt_translit_slp1_iast.rl"
+#line 312 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -833,7 +1021,7 @@ _eof_trans:
 }}
 	break;
 	case 53:
-#line 23 "skt_translit_slp1_iast.rl"
+#line 190 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -841,7 +1029,7 @@ _eof_trans:
 }}
 	break;
 	case 54:
-#line 242 "skt_translit_slp1_iast.rl"
+#line 123 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -849,7 +1037,7 @@ _eof_trans:
 }}
 	break;
 	case 55:
-#line 36 "skt_translit_slp1_iast.rl"
+#line 93 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -860,7 +1048,7 @@ _eof_trans:
 }}
 	break;
 	case 56:
-#line 168 "skt_translit_slp1_iast.rl"
+#line 30 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 196;
@@ -870,7 +1058,7 @@ _eof_trans:
 }}
 	break;
 	case 57:
-#line 142 "skt_translit_slp1_iast.rl"
+#line 14 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 97;
@@ -879,7 +1067,7 @@ _eof_trans:
 }}
 	break;
 	case 58:
-#line 262 "skt_translit_slp1_iast.rl"
+#line 53 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -890,7 +1078,7 @@ _eof_trans:
 }}
 	break;
 	case 59:
-#line 45 "skt_translit_slp1_iast.rl"
+#line 304 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 196;
@@ -900,7 +1088,7 @@ _eof_trans:
 }}
 	break;
 	case 60:
-#line 90 "skt_translit_slp1_iast.rl"
+#line 144 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 97;
@@ -909,7 +1097,7 @@ _eof_trans:
 }}
 	break;
 	case 61:
-#line 134 "skt_translit_slp1_iast.rl"
+#line 202 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 197;
@@ -919,7 +1107,7 @@ _eof_trans:
 }}
 	break;
 	case 62:
-#line 14 "skt_translit_slp1_iast.rl"
+#line 21 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -930,7 +1118,7 @@ _eof_trans:
 }}
 	break;
 	case 63:
-#line 284 "skt_translit_slp1_iast.rl"
+#line 338 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -938,7 +1126,7 @@ _eof_trans:
 }}
 	break;
 	case 64:
-#line 156 "skt_translit_slp1_iast.rl"
+#line 273 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -946,7 +1134,7 @@ _eof_trans:
 }}
 	break;
 	case 65:
-#line 200 "skt_translit_slp1_iast.rl"
+#line 102 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -957,7 +1145,7 @@ _eof_trans:
 }}
 	break;
 	case 66:
-#line 296 "skt_translit_slp1_iast.rl"
+#line 312 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -965,7 +1153,7 @@ _eof_trans:
 }}
 	break;
 	case 67:
-#line 23 "skt_translit_slp1_iast.rl"
+#line 190 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -973,7 +1161,7 @@ _eof_trans:
 }}
 	break;
 	case 68:
-#line 242 "skt_translit_slp1_iast.rl"
+#line 123 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -981,7 +1169,7 @@ _eof_trans:
 }}
 	break;
 	case 69:
-#line 36 "skt_translit_slp1_iast.rl"
+#line 93 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -992,7 +1180,7 @@ _eof_trans:
 }}
 	break;
 	case 70:
-#line 29 "skt_translit_slp1_iast.rl"
+#line 371 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -1001,7 +1189,7 @@ _eof_trans:
 }}
 	break;
 	case 71:
-#line 149 "skt_translit_slp1_iast.rl"
+#line 164 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 106;
@@ -1010,7 +1198,7 @@ _eof_trans:
 }}
 	break;
 	case 72:
-#line 308 "skt_translit_slp1_iast.rl"
+#line 344 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 107;
@@ -1020,7 +1208,7 @@ _eof_trans:
 }}
 	break;
 	case 73:
-#line 220 "skt_translit_slp1_iast.rl"
+#line 259 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -1029,7 +1217,7 @@ _eof_trans:
 }}
 	break;
 	case 74:
-#line 59 "skt_translit_slp1_iast.rl"
+#line 233 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -1038,7 +1226,7 @@ _eof_trans:
 }}
 	break;
 	case 75:
-#line 185 "skt_translit_slp1_iast.rl"
+#line 226 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -1047,7 +1235,7 @@ _eof_trans:
 }}
 	break;
 	case 76:
-#line 364 "skt_translit_slp1_iast.rl"
+#line 291 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -1056,7 +1244,7 @@ _eof_trans:
 }}
 	break;
 	case 77:
-#line 192 "skt_translit_slp1_iast.rl"
+#line 210 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 225;
@@ -1066,7 +1254,7 @@ _eof_trans:
 }}
 	break;
 	case 78:
-#line 84 "skt_translit_slp1_iast.rl"
+#line 78 "skt_translit_slp1_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 204;
@@ -1081,7 +1269,7 @@ _eof_trans:
    }}
 	break;
 	case 80:
-#line 209 "skt_translit_slp1_iast.rl"
+#line 378 "skt_translit_slp1_iast.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 124;
@@ -1348,7 +1536,7 @@ _eof_trans:
 		switch ( *_acts++ )
 		{
 	case 2:
-#line 257 "skt_translit_slp1_iastc.rl"
+#line 353 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 124;
@@ -1356,7 +1544,7 @@ _eof_trans:
 }}
 	break;
 	case 3:
-#line 220 "skt_translit_slp1_iastc.rl"
+#line 63 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 196;
@@ -1366,7 +1554,7 @@ _eof_trans:
 }}
 	break;
 	case 4:
-#line 45 "skt_translit_slp1_iastc.rl"
+#line 22 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 97;
@@ -1375,7 +1563,7 @@ _eof_trans:
 }}
 	break;
 	case 5:
-#line 370 "skt_translit_slp1_iastc.rl"
+#line 233 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -1386,7 +1574,7 @@ _eof_trans:
 }}
 	break;
 	case 6:
-#line 61 "skt_translit_slp1_iastc.rl"
+#line 157 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 196;
@@ -1396,14 +1584,14 @@ _eof_trans:
 }}
 	break;
 	case 7:
-#line 416 "skt_translit_slp1_iastc.rl"
+#line 58 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 76;
 }}
 	break;
 	case 8:
-#line 15 "skt_translit_slp1_iastc.rl"
+#line 259 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 97;
@@ -1412,7 +1600,7 @@ _eof_trans:
 }}
 	break;
 	case 9:
-#line 447 "skt_translit_slp1_iastc.rl"
+#line 332 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 197;
@@ -1422,7 +1610,7 @@ _eof_trans:
 }}
 	break;
 	case 10:
-#line 407 "skt_translit_slp1_iastc.rl"
+#line 365 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -1433,7 +1621,7 @@ _eof_trans:
 }}
 	break;
 	case 11:
-#line 189 "skt_translit_slp1_iastc.rl"
+#line 423 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1441,7 +1629,7 @@ _eof_trans:
 }}
 	break;
 	case 12:
-#line 142 "skt_translit_slp1_iastc.rl"
+#line 305 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1449,7 +1637,7 @@ _eof_trans:
 }}
 	break;
 	case 13:
-#line 355 "skt_translit_slp1_iastc.rl"
+#line 29 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -1460,7 +1648,7 @@ _eof_trans:
 }}
 	break;
 	case 14:
-#line 428 "skt_translit_slp1_iastc.rl"
+#line 221 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1468,7 +1656,7 @@ _eof_trans:
 }}
 	break;
 	case 15:
-#line 312 "skt_translit_slp1_iastc.rl"
+#line 410 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1476,7 +1664,7 @@ _eof_trans:
 }}
 	break;
 	case 16:
-#line 364 "skt_translit_slp1_iastc.rl"
+#line 449 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1484,7 +1672,7 @@ _eof_trans:
 }}
 	break;
 	case 17:
-#line 275 "skt_translit_slp1_iastc.rl"
+#line 212 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -1495,7 +1683,7 @@ _eof_trans:
 }}
 	break;
 	case 18:
-#line 129 "skt_translit_slp1_iastc.rl"
+#line 299 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 196;
@@ -1503,7 +1691,7 @@ _eof_trans:
 }}
 	break;
 	case 19:
-#line 111 "skt_translit_slp1_iastc.rl"
+#line 382 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 98;
@@ -1511,7 +1699,7 @@ _eof_trans:
 }}
 	break;
 	case 20:
-#line 148 "skt_translit_slp1_iastc.rl"
+#line 227 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 99;
@@ -1519,7 +1707,7 @@ _eof_trans:
 }}
 	break;
 	case 21:
-#line 299 "skt_translit_slp1_iastc.rl"
+#line 340 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 100;
@@ -1527,7 +1715,7 @@ _eof_trans:
 }}
 	break;
 	case 22:
-#line 392 "skt_translit_slp1_iastc.rl"
+#line 71 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 97;
@@ -1535,7 +1723,7 @@ _eof_trans:
 }}
 	break;
 	case 23:
-#line 284 "skt_translit_slp1_iastc.rl"
+#line 105 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 114;
@@ -1546,7 +1734,7 @@ _eof_trans:
 }}
 	break;
 	case 24:
-#line 242 "skt_translit_slp1_iastc.rl"
+#line 199 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 103;
@@ -1554,7 +1742,7 @@ _eof_trans:
 }}
 	break;
 	case 25:
-#line 379 "skt_translit_slp1_iastc.rl"
+#line 114 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -1563,7 +1751,7 @@ _eof_trans:
 }}
 	break;
 	case 26:
-#line 341 "skt_translit_slp1_iastc.rl"
+#line 165 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 196;
@@ -1571,7 +1759,7 @@ _eof_trans:
 }}
 	break;
 	case 27:
-#line 117 "skt_translit_slp1_iastc.rl"
+#line 404 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 106;
@@ -1579,7 +1767,7 @@ _eof_trans:
 }}
 	break;
 	case 28:
-#line 214 "skt_translit_slp1_iastc.rl"
+#line 77 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 107;
@@ -1587,7 +1775,7 @@ _eof_trans:
 }}
 	break;
 	case 29:
-#line 263 "skt_translit_slp1_iastc.rl"
+#line 192 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -1596,7 +1784,7 @@ _eof_trans:
 }}
 	break;
 	case 30:
-#line 334 "skt_translit_slp1_iastc.rl"
+#line 121 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -1605,7 +1793,7 @@ _eof_trans:
 }}
 	break;
 	case 31:
-#line 174 "skt_translit_slp1_iastc.rl"
+#line 98 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -1614,7 +1802,7 @@ _eof_trans:
 }}
 	break;
 	case 32:
-#line 386 "skt_translit_slp1_iastc.rl"
+#line 359 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 97;
@@ -1622,7 +1810,7 @@ _eof_trans:
 }}
 	break;
 	case 33:
-#line 228 "skt_translit_slp1_iastc.rl"
+#line 326 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 112;
@@ -1630,7 +1818,7 @@ _eof_trans:
 }}
 	break;
 	case 34:
-#line 318 "skt_translit_slp1_iastc.rl"
+#line 242 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 225;
@@ -1640,7 +1828,7 @@ _eof_trans:
 }}
 	break;
 	case 35:
-#line 97 "skt_translit_slp1_iastc.rl"
+#line 346 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -1649,7 +1837,7 @@ _eof_trans:
 }}
 	break;
 	case 36:
-#line 201 "skt_translit_slp1_iastc.rl"
+#line 429 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 197;
@@ -1657,7 +1845,7 @@ _eof_trans:
 }}
 	break;
 	case 37:
-#line 434 "skt_translit_slp1_iastc.rl"
+#line 136 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 116;
@@ -1665,7 +1853,7 @@ _eof_trans:
 }}
 	break;
 	case 38:
-#line 69 "skt_translit_slp1_iastc.rl"
+#line 435 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 197;
@@ -1673,7 +1861,7 @@ _eof_trans:
 }}
 	break;
 	case 39:
-#line 31 "skt_translit_slp1_iastc.rl"
+#line 128 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 225;
@@ -1683,7 +1871,7 @@ _eof_trans:
 }}
 	break;
 	case 40:
-#line 398 "skt_translit_slp1_iastc.rl"
+#line 250 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 108;
@@ -1694,7 +1882,7 @@ _eof_trans:
 }}
 	break;
 	case 41:
-#line 293 "skt_translit_slp1_iastc.rl"
+#line 320 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1702,7 +1890,7 @@ _eof_trans:
 }}
 	break;
 	case 42:
-#line 181 "skt_translit_slp1_iastc.rl"
+#line 8 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 196;
@@ -1712,7 +1900,7 @@ _eof_trans:
 }}
 	break;
 	case 43:
-#line 135 "skt_translit_slp1_iastc.rl"
+#line 38 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 97;
@@ -1721,7 +1909,7 @@ _eof_trans:
 }}
 	break;
 	case 44:
-#line 52 "skt_translit_slp1_iastc.rl"
+#line 311 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -1732,7 +1920,7 @@ _eof_trans:
 }}
 	break;
 	case 45:
-#line 166 "skt_translit_slp1_iastc.rl"
+#line 142 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 196;
@@ -1742,7 +1930,7 @@ _eof_trans:
 }}
 	break;
 	case 46:
-#line 104 "skt_translit_slp1_iastc.rl"
+#line 205 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 97;
@@ -1751,7 +1939,7 @@ _eof_trans:
 }}
 	break;
 	case 47:
-#line 326 "skt_translit_slp1_iastc.rl"
+#line 374 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 197;
@@ -1761,7 +1949,7 @@ _eof_trans:
 }}
 	break;
 	case 48:
-#line 22 "skt_translit_slp1_iastc.rl"
+#line 89 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -1772,7 +1960,7 @@ _eof_trans:
 }}
 	break;
 	case 49:
-#line 160 "skt_translit_slp1_iastc.rl"
+#line 45 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1780,7 +1968,7 @@ _eof_trans:
 }}
 	break;
 	case 50:
-#line 195 "skt_translit_slp1_iastc.rl"
+#line 171 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1788,7 +1976,7 @@ _eof_trans:
 }}
 	break;
 	case 51:
-#line 248 "skt_translit_slp1_iastc.rl"
+#line 395 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -1799,7 +1987,7 @@ _eof_trans:
 }}
 	break;
 	case 52:
-#line 123 "skt_translit_slp1_iastc.rl"
+#line 286 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1807,7 +1995,7 @@ _eof_trans:
 }}
 	break;
 	case 53:
-#line 82 "skt_translit_slp1_iastc.rl"
+#line 16 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1815,7 +2003,7 @@ _eof_trans:
 }}
 	break;
 	case 54:
-#line 39 "skt_translit_slp1_iastc.rl"
+#line 271 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1823,7 +2011,7 @@ _eof_trans:
 }}
 	break;
 	case 55:
-#line 88 "skt_translit_slp1_iastc.rl"
+#line 277 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -1834,7 +2022,7 @@ _eof_trans:
 }}
 	break;
 	case 56:
-#line 181 "skt_translit_slp1_iastc.rl"
+#line 8 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 196;
@@ -1844,7 +2032,7 @@ _eof_trans:
 }}
 	break;
 	case 57:
-#line 135 "skt_translit_slp1_iastc.rl"
+#line 38 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 97;
@@ -1853,7 +2041,7 @@ _eof_trans:
 }}
 	break;
 	case 58:
-#line 52 "skt_translit_slp1_iastc.rl"
+#line 311 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -1864,7 +2052,7 @@ _eof_trans:
 }}
 	break;
 	case 59:
-#line 166 "skt_translit_slp1_iastc.rl"
+#line 142 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 196;
@@ -1874,7 +2062,7 @@ _eof_trans:
 }}
 	break;
 	case 60:
-#line 104 "skt_translit_slp1_iastc.rl"
+#line 205 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 97;
@@ -1883,7 +2071,7 @@ _eof_trans:
 }}
 	break;
 	case 61:
-#line 326 "skt_translit_slp1_iastc.rl"
+#line 374 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 197;
@@ -1893,7 +2081,7 @@ _eof_trans:
 }}
 	break;
 	case 62:
-#line 22 "skt_translit_slp1_iastc.rl"
+#line 89 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -1904,7 +2092,7 @@ _eof_trans:
 }}
 	break;
 	case 63:
-#line 160 "skt_translit_slp1_iastc.rl"
+#line 45 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1912,7 +2100,7 @@ _eof_trans:
 }}
 	break;
 	case 64:
-#line 195 "skt_translit_slp1_iastc.rl"
+#line 171 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1920,7 +2108,7 @@ _eof_trans:
 }}
 	break;
 	case 65:
-#line 248 "skt_translit_slp1_iastc.rl"
+#line 395 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -1931,7 +2119,7 @@ _eof_trans:
 }}
 	break;
 	case 66:
-#line 123 "skt_translit_slp1_iastc.rl"
+#line 286 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1939,7 +2127,7 @@ _eof_trans:
 }}
 	break;
 	case 67:
-#line 82 "skt_translit_slp1_iastc.rl"
+#line 16 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1947,7 +2135,7 @@ _eof_trans:
 }}
 	break;
 	case 68:
-#line 39 "skt_translit_slp1_iastc.rl"
+#line 271 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -1955,7 +2143,7 @@ _eof_trans:
 }}
 	break;
 	case 69:
-#line 88 "skt_translit_slp1_iastc.rl"
+#line 277 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 225;
@@ -1966,7 +2154,7 @@ _eof_trans:
 }}
 	break;
 	case 70:
-#line 75 "skt_translit_slp1_iastc.rl"
+#line 292 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 114;
@@ -1975,7 +2163,7 @@ _eof_trans:
 }}
 	break;
 	case 71:
-#line 305 "skt_translit_slp1_iastc.rl"
+#line 388 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 106;
@@ -1984,7 +2172,7 @@ _eof_trans:
 }}
 	break;
 	case 72:
-#line 347 "skt_translit_slp1_iastc.rl"
+#line 177 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 107;
@@ -1994,7 +2182,7 @@ _eof_trans:
 }}
 	break;
 	case 73:
-#line 440 "skt_translit_slp1_iastc.rl"
+#line 150 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -2003,7 +2191,7 @@ _eof_trans:
 }}
 	break;
 	case 74:
-#line 207 "skt_translit_slp1_iastc.rl"
+#line 185 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -2012,7 +2200,7 @@ _eof_trans:
 }}
 	break;
 	case 75:
-#line 421 "skt_translit_slp1_iastc.rl"
+#line 51 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 108;
@@ -2021,7 +2209,7 @@ _eof_trans:
 }}
 	break;
 	case 76:
-#line 8 "skt_translit_slp1_iastc.rl"
+#line 416 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -2030,7 +2218,7 @@ _eof_trans:
 }}
 	break;
 	case 77:
-#line 234 "skt_translit_slp1_iastc.rl"
+#line 441 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 4);
    buf->data[buf->size++] = 225;
@@ -2040,7 +2228,7 @@ _eof_trans:
 }}
 	break;
 	case 78:
-#line 154 "skt_translit_slp1_iastc.rl"
+#line 83 "skt_translit_slp1_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 204;
@@ -2055,7 +2243,7 @@ _eof_trans:
    }}
 	break;
 	case 80:
-#line 270 "skt_translit_slp1_iastc.rl"
+#line 266 "skt_translit_slp1_iastc.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 124;
@@ -2304,7 +2492,7 @@ _eof_trans:
 	{te = p+1;}
 	break;
 	case 3:
-#line 43 "skt_translit_iastc_iast.rl"
+#line 36 "skt_translit_iastc_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -2313,7 +2501,7 @@ _eof_trans:
 }}
 	break;
 	case 4:
-#line 8 "skt_translit_iastc_iast.rl"
+#line 57 "skt_translit_iastc_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -2322,7 +2510,7 @@ _eof_trans:
 }}
 	break;
 	case 5:
-#line 36 "skt_translit_iastc_iast.rl"
+#line 29 "skt_translit_iastc_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -2331,7 +2519,7 @@ _eof_trans:
 }}
 	break;
 	case 6:
-#line 22 "skt_translit_iastc_iast.rl"
+#line 8 "skt_translit_iastc_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -2347,7 +2535,7 @@ _eof_trans:
    }}
 	break;
 	case 8:
-#line 29 "skt_translit_iastc_iast.rl"
+#line 50 "skt_translit_iastc_iast.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -2356,7 +2544,7 @@ _eof_trans:
 }}
 	break;
 	case 9:
-#line 15 "skt_translit_iastc_iast.rl"
+#line 43 "skt_translit_iastc_iast.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -2365,7 +2553,7 @@ _eof_trans:
 }}
 	break;
 	case 10:
-#line 57 "skt_translit_iastc_iast.rl"
+#line 22 "skt_translit_iastc_iast.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -2374,7 +2562,7 @@ _eof_trans:
 }}
 	break;
 	case 11:
-#line 50 "skt_translit_iastc_iast.rl"
+#line 15 "skt_translit_iastc_iast.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -2390,7 +2578,7 @@ _eof_trans:
    }}
 	break;
 	case 13:
-#line 29 "skt_translit_iastc_iast.rl"
+#line 50 "skt_translit_iastc_iast.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -2399,7 +2587,7 @@ _eof_trans:
 }}
 	break;
 	case 14:
-#line 15 "skt_translit_iastc_iast.rl"
+#line 43 "skt_translit_iastc_iast.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -2408,7 +2596,7 @@ _eof_trans:
 }}
 	break;
 	case 15:
-#line 57 "skt_translit_iastc_iast.rl"
+#line 22 "skt_translit_iastc_iast.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -2417,7 +2605,7 @@ _eof_trans:
 }}
 	break;
 	case 16:
-#line 50 "skt_translit_iastc_iast.rl"
+#line 15 "skt_translit_iastc_iast.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -2761,14 +2949,14 @@ static const short _skt_translit_iast_nagari_trans_actions[] = {
 	587, 277, 567, 279, 569, 321, 323, 433, 
 	435, 437, 439, 5, 5, 5, 5, 441, 
 	443, 0, 0, 587, 285, 571, 287, 573, 
-	289, 575, 291, 577, 77, 95, 97, 25, 
-	183, 5, 187, 53, 165, 5, 187, 107, 
-	173, 81, 49, 27, 65, 185, 5, 187, 
-	91, 167, 5, 187, 83, 163, 85, 161, 
-	29, 169, 23, 179, 55, 177, 101, 175, 
-	35, 171, 5, 5, 67, 89, 187, 33, 
-	151, 41, 155, 5, 5, 5, 5, 187, 
-	79, 157, 43, 159, 99, 153, 45, 181, 
+	289, 575, 291, 577, 21, 55, 87, 107, 
+	183, 5, 187, 19, 169, 5, 187, 65, 
+	151, 23, 79, 61, 57, 185, 5, 187, 
+	17, 167, 5, 187, 91, 165, 47, 179, 
+	101, 157, 7, 155, 85, 163, 13, 177, 
+	105, 153, 5, 5, 99, 31, 187, 11, 
+	161, 43, 175, 5, 5, 5, 5, 187, 
+	67, 159, 35, 171, 77, 181, 51, 173, 
 	293, 295, 297, 299, 301, 303, 305, 307, 
 	309, 311, 313, 5, 0, 0, 0, 205, 
 	0, 341, 207, 0, 0, 5, 351, 353, 
@@ -2794,33 +2982,33 @@ static const short _skt_translit_iast_nagari_trans_actions[] = {
 	423, 533, 425, 427, 535, 0, 479, 0, 
 	481, 0, 483, 0, 485, 0, 487, 0, 
 	489, 445, 447, 537, 449, 451, 539, 5, 
-	57, 73, 5, 61, 5, 9, 5, 59, 
-	31, 5, 69, 5, 37, 0, 0, 0, 
-	5, 111, 109, 51, 75, 93, 0, 145, 
-	0, 149, 0, 127, 0, 149, 0, 135, 
-	13, 47, 17, 21, 0, 147, 0, 149, 
-	0, 129, 0, 149, 0, 125, 39, 63, 
-	71, 103, 105, 19, 11, 7, 87, 15, 
-	149, 5, 5, 5, 5, 149, 0, 123, 
-	0, 131, 0, 141, 0, 139, 5, 5, 
-	149, 0, 137, 0, 133, 0, 0, 149, 
-	0, 113, 0, 117, 0, 119, 0, 121, 
-	0, 115, 0, 143, 543, 579, 547, 581, 
+	27, 9, 5, 71, 5, 59, 5, 83, 
+	75, 5, 53, 5, 69, 0, 0, 0, 
+	5, 111, 49, 97, 93, 109, 0, 145, 
+	0, 149, 0, 131, 0, 149, 0, 113, 
+	73, 103, 89, 15, 0, 147, 0, 149, 
+	0, 129, 0, 149, 0, 127, 39, 63, 
+	25, 45, 29, 37, 33, 41, 81, 95, 
+	149, 5, 5, 5, 5, 149, 0, 141, 
+	0, 119, 0, 117, 0, 125, 5, 5, 
+	149, 0, 139, 0, 115, 0, 0, 149, 
+	0, 123, 0, 137, 0, 121, 0, 133, 
+	0, 143, 0, 135, 543, 579, 547, 581, 
 	549, 545, 583, 551, 585, 553, 555, 557, 
 	559, 561, 563, 565, 587, 567, 569, 587, 
-	571, 573, 575, 577, 183, 187, 165, 187, 
-	173, 185, 187, 167, 187, 163, 161, 169, 
-	179, 177, 175, 171, 187, 151, 155, 187, 
-	157, 159, 153, 181, 455, 493, 495, 497, 
+	571, 573, 575, 577, 183, 187, 169, 187, 
+	151, 185, 187, 167, 187, 165, 179, 157, 
+	155, 163, 177, 153, 187, 161, 175, 187, 
+	159, 171, 181, 173, 455, 493, 495, 497, 
 	499, 501, 503, 505, 459, 507, 509, 461, 
 	511, 457, 513, 515, 517, 519, 521, 523, 
 	525, 463, 527, 529, 465, 531, 491, 541, 
 	541, 467, 469, 471, 473, 541, 475, 477, 
 	541, 533, 535, 479, 481, 483, 485, 487, 
-	489, 537, 539, 145, 149, 127, 149, 135, 
-	147, 149, 129, 149, 125, 149, 149, 123, 
-	131, 141, 139, 149, 137, 133, 149, 113, 
-	117, 119, 121, 115, 143, 0
+	489, 537, 539, 145, 149, 131, 149, 113, 
+	147, 149, 129, 149, 127, 149, 149, 141, 
+	119, 117, 125, 149, 139, 115, 149, 123, 
+	137, 121, 133, 143, 135, 0
 };
 
 static const short _skt_translit_iast_nagari_to_state_actions[] = {
@@ -2989,95 +3177,6 @@ _eof_trans:
 	{te = p+1;}
 	break;
 	case 3:
-#line 648 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 191;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 4:
-#line 678 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 129;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 5:
-#line 762 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 135;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 6:
-#line 773 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 7:
-#line 686 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 129;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 8:
-#line 773 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 9:
-#line 613 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 10:
-#line 811 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 140;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 11:
 #line 667 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -3090,46 +3189,7 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 12:
-#line 819 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 140;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 13:
-#line 781 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 14:
-#line 629 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 190;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 15:
+	case 4:
 #line 640 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
@@ -3139,7 +3199,7 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 16:
+	case 5:
 #line 743 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -3152,7 +3212,7 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 17:
+	case 6:
 #line 705 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -3165,13 +3225,141 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 18:
-#line 678 "skt_translit_iast_nagari.rl"
+	case 7:
+#line 811 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 140;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 8:
+#line 838 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 163;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 9:
+#line 838 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 163;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 10:
+#line 781 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 136;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 11:
+#line 781 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 136;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 12:
+#line 648 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 191;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 13:
+#line 754 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 135;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 14:
+#line 686 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 129;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 15:
+#line 838 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 163;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 16:
+#line 762 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 135;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 17:
+#line 724 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 132;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 18:
+#line 613 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -3186,6 +3374,19 @@ _eof_trans:
 }}
 	break;
 	case 20:
+#line 648 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 191;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 21:
 #line 743 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -3198,26 +3399,13 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 21:
-#line 724 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 132;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
 	case 22:
-#line 724 "skt_translit_iast_nagari.rl"
+#line 800 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 132;
+   buf->data[buf->size++] = 139;
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 145;
@@ -3225,16 +3413,52 @@ _eof_trans:
 }}
 	break;
 	case 23:
-#line 811 "skt_translit_iast_nagari.rl"
+#line 629 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
-   skt_buf_grow(buf, 3);
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 190;
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 140;
+   buf->data[buf->size++] = 145;
    {cs = 48; goto _again;}
 }}
 	break;
 	case 24:
+#line 773 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 136;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 25:
+#line 724 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 132;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 26:
+#line 792 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 139;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 27:
 #line 819 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -3247,66 +3471,39 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 25:
-#line 811 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 140;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 26:
-#line 838 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 163;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 27:
-#line 667 "skt_translit_iast_nagari.rl"
+	case 28:
+#line 819 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 128;
+   buf->data[buf->size++] = 140;
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 145;
    {cs = 48; goto _again;}
 }}
 	break;
-	case 28:
-#line 754 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 135;
-   {cs = 48; goto _again;}
-}}
-	break;
 	case 29:
-#line 754 "skt_translit_iast_nagari.rl"
+#line 678 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 135;
+   buf->data[buf->size++] = 129;
    {cs = 48; goto _again;}
 }}
 	break;
 	case 30:
-#line 792 "skt_translit_iast_nagari.rl"
+#line 781 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
-   skt_buf_grow(buf, 3);
+   skt_buf_grow(buf, 6);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 139;
+   buf->data[buf->size++] = 136;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -3324,111 +3521,6 @@ _eof_trans:
 }}
 	break;
 	case 32:
-#line 819 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 140;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 33:
-#line 838 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 163;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 34:
-#line 792 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 139;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 35:
-#line 648 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 191;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 36:
-#line 640 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 191;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 37:
-#line 773 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 38:
-#line 781 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 39:
-#line 724 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 132;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 40:
-#line 781 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 41:
 #line 830 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
@@ -3438,89 +3530,7 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 42:
-#line 629 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 190;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 43:
-#line 800 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 139;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 44:
-#line 838 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 163;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 45:
-#line 838 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 163;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 46:
-#line 811 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 140;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 47:
-#line 819 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 140;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 48:
-#line 781 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 49:
+	case 33:
 #line 724 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -3533,20 +3543,73 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 50:
-#line 705 "skt_translit_iast_nagari.rl"
+	case 34:
+#line 678 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 129;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 35:
+#line 792 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 139;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 36:
+#line 773 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 136;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 37:
+#line 640 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 191;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 38:
+#line 724 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 130;
+   buf->data[buf->size++] = 132;
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 145;
    {cs = 48; goto _again;}
 }}
 	break;
-	case 51:
+	case 39:
+#line 819 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 140;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 40:
 #line 800 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -3559,7 +3622,73 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 52:
+	case 41:
+#line 754 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 135;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 42:
+#line 667 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 128;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 43:
+#line 781 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 136;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 44:
+#line 773 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 136;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 45:
+#line 830 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 132;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 46:
+#line 773 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 136;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 47:
 #line 686 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -3572,23 +3701,82 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 53:
-#line 830 "skt_translit_iast_nagari.rl"
+	case 48:
+#line 811 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 132;
+   buf->data[buf->size++] = 140;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 49:
+#line 838 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 163;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 50:
+#line 629 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 190;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 51:
+#line 811 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 140;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 52:
+#line 705 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 130;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 53:
+#line 819 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 140;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
    {cs = 48; goto _again;}
 }}
 	break;
 	case 54:
-#line 773 "skt_translit_iast_nagari.rl"
+#line 811 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
+   buf->data[buf->size++] = 140;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -3604,42 +3792,42 @@ _eof_trans:
 }}
 	break;
 	case 56:
-#line 735 "skt_translit_iast_nagari.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 162;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 57:
-#line 830 "skt_translit_iast_nagari.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 132;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 58:
-#line 735 "skt_translit_iast_nagari.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 162;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 59:
 #line 716 "skt_translit_iast_nagari.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 131;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 57:
+#line 697 "skt_translit_iast_nagari.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 130;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 58:
+#line 659 "skt_translit_iast_nagari.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 128;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 59:
+#line 621 "skt_translit_iast_nagari.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 190;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -3654,32 +3842,32 @@ _eof_trans:
 }}
 	break;
 	case 61:
-#line 621 "skt_translit_iast_nagari.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 190;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 62:
-#line 716 "skt_translit_iast_nagari.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 131;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 63:
 #line 735 "skt_translit_iast_nagari.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 162;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 62:
+#line 659 "skt_translit_iast_nagari.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 128;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 63:
+#line 716 "skt_translit_iast_nagari.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 131;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -3694,26 +3882,16 @@ _eof_trans:
 }}
 	break;
 	case 65:
-#line 621 "skt_translit_iast_nagari.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 190;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 66:
-#line 697 "skt_translit_iast_nagari.rl"
+#line 735 "skt_translit_iast_nagari.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 130;
+   buf->data[buf->size++] = 162;
    {cs = 48; goto _again;}
 }}
 	break;
-	case 67:
+	case 66:
 #line 716 "skt_translit_iast_nagari.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
@@ -3723,7 +3901,27 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
+	case 67:
+#line 830 "skt_translit_iast_nagari.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 132;
+   {cs = 48; goto _again;}
+}}
+	break;
 	case 68:
+#line 735 "skt_translit_iast_nagari.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 162;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 69:
 #line 697 "skt_translit_iast_nagari.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
@@ -3733,23 +3931,13 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 69:
-#line 659 "skt_translit_iast_nagari.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 128;
-   {cs = 48; goto _again;}
-}}
-	break;
 	case 70:
-#line 659 "skt_translit_iast_nagari.rl"
+#line 621 "skt_translit_iast_nagari.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 128;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 190;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -3787,42 +3975,42 @@ _eof_trans:
 }}
 	break;
 	case 75:
-#line 735 "skt_translit_iast_nagari.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 162;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 76:
-#line 830 "skt_translit_iast_nagari.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 132;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 77:
-#line 735 "skt_translit_iast_nagari.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 162;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 78:
 #line 716 "skt_translit_iast_nagari.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 131;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 76:
+#line 697 "skt_translit_iast_nagari.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 130;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 77:
+#line 659 "skt_translit_iast_nagari.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 128;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 78:
+#line 621 "skt_translit_iast_nagari.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 190;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -3837,32 +4025,32 @@ _eof_trans:
 }}
 	break;
 	case 80:
-#line 621 "skt_translit_iast_nagari.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 190;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 81:
-#line 716 "skt_translit_iast_nagari.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 131;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 82:
 #line 735 "skt_translit_iast_nagari.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 162;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 81:
+#line 659 "skt_translit_iast_nagari.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 128;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 82:
+#line 716 "skt_translit_iast_nagari.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 131;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -3877,26 +4065,16 @@ _eof_trans:
 }}
 	break;
 	case 84:
-#line 621 "skt_translit_iast_nagari.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 190;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 85:
-#line 697 "skt_translit_iast_nagari.rl"
+#line 735 "skt_translit_iast_nagari.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 130;
+   buf->data[buf->size++] = 162;
    {cs = 48; goto _again;}
 }}
 	break;
-	case 86:
+	case 85:
 #line 716 "skt_translit_iast_nagari.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
@@ -3906,7 +4084,27 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
+	case 86:
+#line 830 "skt_translit_iast_nagari.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 132;
+   {cs = 48; goto _again;}
+}}
+	break;
 	case 87:
+#line 735 "skt_translit_iast_nagari.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 162;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 88:
 #line 697 "skt_translit_iast_nagari.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
@@ -3916,23 +4114,13 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 88:
-#line 659 "skt_translit_iast_nagari.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 128;
-   {cs = 48; goto _again;}
-}}
-	break;
 	case 89:
-#line 659 "skt_translit_iast_nagari.rl"
+#line 621 "skt_translit_iast_nagari.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 128;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 190;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -6391,35 +6579,35 @@ _eof_trans:
 	{te = p+1;}
 	break;
 	case 3:
-#line 52 "skt_translit_iast_slp1.rl"
+#line 265 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 69;
 }}
 	break;
 	case 4:
-#line 145 "skt_translit_iast_slp1.rl"
+#line 318 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 79;
 }}
 	break;
 	case 5:
-#line 52 "skt_translit_iast_slp1.rl"
+#line 265 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 69;
 }}
 	break;
 	case 6:
-#line 145 "skt_translit_iast_slp1.rl"
+#line 318 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 79;
 }}
 	break;
 	case 7:
-#line 181 "skt_translit_iast_slp1.rl"
+#line 110 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -6427,7 +6615,7 @@ _eof_trans:
 }}
 	break;
 	case 8:
-#line 57 "skt_translit_iast_slp1.rl"
+#line 58 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -6435,7 +6623,7 @@ _eof_trans:
 }}
 	break;
 	case 9:
-#line 106 "skt_translit_iast_slp1.rl"
+#line 280 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -6443,7 +6631,7 @@ _eof_trans:
 }}
 	break;
 	case 10:
-#line 271 "skt_translit_iast_slp1.rl"
+#line 329 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -6451,7 +6639,7 @@ _eof_trans:
 }}
 	break;
 	case 11:
-#line 181 "skt_translit_iast_slp1.rl"
+#line 110 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -6459,7 +6647,7 @@ _eof_trans:
 }}
 	break;
 	case 12:
-#line 57 "skt_translit_iast_slp1.rl"
+#line 58 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -6467,7 +6655,7 @@ _eof_trans:
 }}
 	break;
 	case 13:
-#line 106 "skt_translit_iast_slp1.rl"
+#line 280 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -6475,7 +6663,7 @@ _eof_trans:
 }}
 	break;
 	case 14:
-#line 271 "skt_translit_iast_slp1.rl"
+#line 329 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -6483,70 +6671,70 @@ _eof_trans:
 }}
 	break;
 	case 15:
-#line 193 "skt_translit_iast_slp1.rl"
+#line 64 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 66;
 }}
 	break;
 	case 16:
-#line 193 "skt_translit_iast_slp1.rl"
+#line 64 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 66;
 }}
 	break;
 	case 17:
-#line 96 "skt_translit_iast_slp1.rl"
+#line 218 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 67;
 }}
 	break;
 	case 18:
-#line 96 "skt_translit_iast_slp1.rl"
+#line 218 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 67;
 }}
 	break;
 	case 19:
-#line 101 "skt_translit_iast_slp1.rl"
+#line 53 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 68;
 }}
 	break;
 	case 20:
-#line 101 "skt_translit_iast_slp1.rl"
+#line 53 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 68;
 }}
 	break;
 	case 21:
-#line 36 "skt_translit_iast_slp1.rl"
+#line 438 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 101;
 }}
 	break;
 	case 22:
-#line 161 "skt_translit_iast_slp1.rl"
+#line 168 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 71;
 }}
 	break;
 	case 23:
-#line 161 "skt_translit_iast_slp1.rl"
+#line 168 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 71;
 }}
 	break;
 	case 24:
-#line 360 "skt_translit_iast_slp1.rl"
+#line 244 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 104;
@@ -6560,154 +6748,154 @@ _eof_trans:
 }}
 	break;
 	case 26:
-#line 319 "skt_translit_iast_slp1.rl"
+#line 196 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 74;
 }}
 	break;
 	case 27:
-#line 319 "skt_translit_iast_slp1.rl"
+#line 196 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 74;
 }}
 	break;
 	case 28:
-#line 231 "skt_translit_iast_slp1.rl"
+#line 233 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 75;
 }}
 	break;
 	case 29:
-#line 231 "skt_translit_iast_slp1.rl"
+#line 233 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 75;
 }}
 	break;
 	case 30:
-#line 123 "skt_translit_iast_slp1.rl"
+#line 228 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 88;
 }}
 	break;
 	case 31:
-#line 410 "skt_translit_iast_slp1.rl"
+#line 308 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 109;
 }}
 	break;
 	case 32:
-#line 283 "skt_translit_iast_slp1.rl"
+#line 411 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 110;
 }}
 	break;
 	case 33:
-#line 399 "skt_translit_iast_slp1.rl"
+#line 298 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 111;
 }}
 	break;
 	case 34:
-#line 25 "skt_translit_iast_slp1.rl"
+#line 185 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 80;
 }}
 	break;
 	case 35:
-#line 25 "skt_translit_iast_slp1.rl"
+#line 185 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 80;
 }}
 	break;
 	case 36:
-#line 256 "skt_translit_iast_slp1.rl"
+#line 89 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 70;
 }}
 	break;
 	case 37:
-#line 246 "skt_translit_iast_slp1.rl"
+#line 133 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 115;
 }}
 	break;
 	case 38:
-#line 112 "skt_translit_iast_slp1.rl"
+#line 223 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 84;
 }}
 	break;
 	case 39:
-#line 112 "skt_translit_iast_slp1.rl"
+#line 223 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 84;
 }}
 	break;
 	case 40:
-#line 261 "skt_translit_iast_slp1.rl"
+#line 69 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 117;
 }}
 	break;
 	case 41:
-#line 308 "skt_translit_iast_slp1.rl"
+#line 394 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 118;
 }}
 	break;
 	case 42:
-#line 350 "skt_translit_iast_slp1.rl"
+#line 158 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 121;
 }}
 	break;
 	case 43:
-#line 52 "skt_translit_iast_slp1.rl"
+#line 265 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 69;
 }}
 	break;
 	case 44:
-#line 145 "skt_translit_iast_slp1.rl"
+#line 318 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 79;
 }}
 	break;
 	case 45:
-#line 52 "skt_translit_iast_slp1.rl"
+#line 265 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 69;
 }}
 	break;
 	case 46:
-#line 145 "skt_translit_iast_slp1.rl"
+#line 318 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 79;
 }}
 	break;
 	case 47:
-#line 181 "skt_translit_iast_slp1.rl"
+#line 110 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -6715,7 +6903,7 @@ _eof_trans:
 }}
 	break;
 	case 48:
-#line 57 "skt_translit_iast_slp1.rl"
+#line 58 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -6723,7 +6911,7 @@ _eof_trans:
 }}
 	break;
 	case 49:
-#line 106 "skt_translit_iast_slp1.rl"
+#line 280 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -6731,7 +6919,7 @@ _eof_trans:
 }}
 	break;
 	case 50:
-#line 271 "skt_translit_iast_slp1.rl"
+#line 329 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -6739,7 +6927,7 @@ _eof_trans:
 }}
 	break;
 	case 51:
-#line 181 "skt_translit_iast_slp1.rl"
+#line 110 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -6747,7 +6935,7 @@ _eof_trans:
 }}
 	break;
 	case 52:
-#line 57 "skt_translit_iast_slp1.rl"
+#line 58 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -6755,7 +6943,7 @@ _eof_trans:
 }}
 	break;
 	case 53:
-#line 106 "skt_translit_iast_slp1.rl"
+#line 280 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -6763,7 +6951,7 @@ _eof_trans:
 }}
 	break;
 	case 54:
-#line 271 "skt_translit_iast_slp1.rl"
+#line 329 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -6771,133 +6959,133 @@ _eof_trans:
 }}
 	break;
 	case 55:
-#line 193 "skt_translit_iast_slp1.rl"
+#line 64 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 66;
 }}
 	break;
 	case 56:
-#line 193 "skt_translit_iast_slp1.rl"
+#line 64 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 66;
 }}
 	break;
 	case 57:
-#line 96 "skt_translit_iast_slp1.rl"
+#line 218 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 67;
 }}
 	break;
 	case 58:
-#line 96 "skt_translit_iast_slp1.rl"
+#line 218 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 67;
 }}
 	break;
 	case 59:
-#line 101 "skt_translit_iast_slp1.rl"
+#line 53 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 68;
 }}
 	break;
 	case 60:
-#line 101 "skt_translit_iast_slp1.rl"
+#line 53 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 68;
 }}
 	break;
 	case 61:
-#line 161 "skt_translit_iast_slp1.rl"
+#line 168 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 71;
 }}
 	break;
 	case 62:
-#line 161 "skt_translit_iast_slp1.rl"
+#line 168 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 71;
 }}
 	break;
 	case 63:
-#line 319 "skt_translit_iast_slp1.rl"
+#line 196 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 74;
 }}
 	break;
 	case 64:
-#line 319 "skt_translit_iast_slp1.rl"
+#line 196 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 74;
 }}
 	break;
 	case 65:
-#line 231 "skt_translit_iast_slp1.rl"
+#line 233 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 75;
 }}
 	break;
 	case 66:
-#line 231 "skt_translit_iast_slp1.rl"
+#line 233 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 75;
 }}
 	break;
 	case 67:
-#line 123 "skt_translit_iast_slp1.rl"
+#line 228 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 88;
 }}
 	break;
 	case 68:
-#line 25 "skt_translit_iast_slp1.rl"
+#line 185 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 80;
 }}
 	break;
 	case 69:
-#line 25 "skt_translit_iast_slp1.rl"
+#line 185 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 80;
 }}
 	break;
 	case 70:
-#line 256 "skt_translit_iast_slp1.rl"
+#line 89 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 70;
 }}
 	break;
 	case 71:
-#line 112 "skt_translit_iast_slp1.rl"
+#line 223 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 84;
 }}
 	break;
 	case 72:
-#line 112 "skt_translit_iast_slp1.rl"
+#line 223 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 84;
 }}
 	break;
 	case 73:
-#line 213 "skt_translit_iast_slp1.rl"
+#line 14 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -6905,7 +7093,7 @@ _eof_trans:
 }}
 	break;
 	case 74:
-#line 404 "skt_translit_iast_slp1.rl"
+#line 37 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -6913,7 +7101,7 @@ _eof_trans:
 }}
 	break;
 	case 75:
-#line 117 "skt_translit_iast_slp1.rl"
+#line 372 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -6921,7 +7109,7 @@ _eof_trans:
 }}
 	break;
 	case 76:
-#line 329 "skt_translit_iast_slp1.rl"
+#line 405 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -6929,7 +7117,7 @@ _eof_trans:
 }}
 	break;
 	case 77:
-#line 90 "skt_translit_iast_slp1.rl"
+#line 99 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -6937,7 +7125,7 @@ _eof_trans:
 }}
 	break;
 	case 78:
-#line 365 "skt_translit_iast_slp1.rl"
+#line 121 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -6945,7 +7133,7 @@ _eof_trans:
 }}
 	break;
 	case 79:
-#line 219 "skt_translit_iast_slp1.rl"
+#line 212 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -6953,14 +7141,14 @@ _eof_trans:
 }}
 	break;
 	case 80:
-#line 8 "skt_translit_iast_slp1.rl"
+#line 105 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 89;
 }}
 	break;
 	case 81:
-#line 277 "skt_translit_iast_slp1.rl"
+#line 286 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -6968,7 +7156,7 @@ _eof_trans:
 }}
 	break;
 	case 82:
-#line 128 "skt_translit_iast_slp1.rl"
+#line 422 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -6976,7 +7164,7 @@ _eof_trans:
 }}
 	break;
 	case 83:
-#line 134 "skt_translit_iast_slp1.rl"
+#line 356 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -6984,7 +7172,7 @@ _eof_trans:
 }}
 	break;
 	case 84:
-#line 41 "skt_translit_iast_slp1.rl"
+#line 399 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -6992,7 +7180,7 @@ _eof_trans:
 }}
 	break;
 	case 85:
-#line 404 "skt_translit_iast_slp1.rl"
+#line 37 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7000,7 +7188,7 @@ _eof_trans:
 }}
 	break;
 	case 86:
-#line 117 "skt_translit_iast_slp1.rl"
+#line 372 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7008,7 +7196,7 @@ _eof_trans:
 }}
 	break;
 	case 87:
-#line 329 "skt_translit_iast_slp1.rl"
+#line 405 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7016,7 +7204,7 @@ _eof_trans:
 }}
 	break;
 	case 88:
-#line 90 "skt_translit_iast_slp1.rl"
+#line 99 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7024,7 +7212,7 @@ _eof_trans:
 }}
 	break;
 	case 89:
-#line 365 "skt_translit_iast_slp1.rl"
+#line 121 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7032,7 +7220,7 @@ _eof_trans:
 }}
 	break;
 	case 90:
-#line 219 "skt_translit_iast_slp1.rl"
+#line 212 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7040,14 +7228,14 @@ _eof_trans:
 }}
 	break;
 	case 91:
-#line 8 "skt_translit_iast_slp1.rl"
+#line 105 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 89;
 }}
 	break;
 	case 92:
-#line 277 "skt_translit_iast_slp1.rl"
+#line 286 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7055,7 +7243,7 @@ _eof_trans:
 }}
 	break;
 	case 93:
-#line 128 "skt_translit_iast_slp1.rl"
+#line 422 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7063,7 +7251,7 @@ _eof_trans:
 }}
 	break;
 	case 94:
-#line 134 "skt_translit_iast_slp1.rl"
+#line 356 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7071,7 +7259,7 @@ _eof_trans:
 }}
 	break;
 	case 95:
-#line 41 "skt_translit_iast_slp1.rl"
+#line 399 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7079,7 +7267,7 @@ _eof_trans:
 }}
 	break;
 	case 96:
-#line 30 "skt_translit_iast_slp1.rl"
+#line 201 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7087,7 +7275,7 @@ _eof_trans:
 }}
 	break;
 	case 97:
-#line 377 "skt_translit_iast_slp1.rl"
+#line 238 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7095,7 +7283,7 @@ _eof_trans:
 }}
 	break;
 	case 98:
-#line 30 "skt_translit_iast_slp1.rl"
+#line 201 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7103,7 +7291,7 @@ _eof_trans:
 }}
 	break;
 	case 99:
-#line 377 "skt_translit_iast_slp1.rl"
+#line 238 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7111,7 +7299,7 @@ _eof_trans:
 }}
 	break;
 	case 100:
-#line 68 "skt_translit_iast_slp1.rl"
+#line 26 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7119,7 +7307,7 @@ _eof_trans:
 }}
 	break;
 	case 101:
-#line 415 "skt_translit_iast_slp1.rl"
+#line 190 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7127,7 +7315,7 @@ _eof_trans:
 }}
 	break;
 	case 102:
-#line 68 "skt_translit_iast_slp1.rl"
+#line 26 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7135,7 +7323,7 @@ _eof_trans:
 }}
 	break;
 	case 103:
-#line 415 "skt_translit_iast_slp1.rl"
+#line 190 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7143,21 +7331,21 @@ _eof_trans:
 }}
 	break;
 	case 104:
-#line 63 "skt_translit_iast_slp1.rl"
+#line 313 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 83;
 }}
 	break;
 	case 105:
-#line 63 "skt_translit_iast_slp1.rl"
+#line 313 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 83;
 }}
 	break;
 	case 106:
-#line 13 "skt_translit_iast_slp1.rl"
+#line 383 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7165,7 +7353,7 @@ _eof_trans:
 }}
 	break;
 	case 107:
-#line 371 "skt_translit_iast_slp1.rl"
+#line 8 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7173,7 +7361,7 @@ _eof_trans:
 }}
 	break;
 	case 108:
-#line 13 "skt_translit_iast_slp1.rl"
+#line 383 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7181,7 +7369,7 @@ _eof_trans:
 }}
 	break;
 	case 109:
-#line 371 "skt_translit_iast_slp1.rl"
+#line 8 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7189,70 +7377,70 @@ _eof_trans:
 }}
 	break;
 	case 110:
-#line 438 "skt_translit_iast_slp1.rl"
+#line 340 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 126;
 }}
 	break;
 	case 111:
-#line 241 "skt_translit_iast_slp1.rl"
+#line 94 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 81;
 }}
 	break;
 	case 112:
-#line 241 "skt_translit_iast_slp1.rl"
+#line 94 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 81;
 }}
 	break;
 	case 113:
-#line 241 "skt_translit_iast_slp1.rl"
+#line 94 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 81;
 }}
 	break;
 	case 114:
-#line 241 "skt_translit_iast_slp1.rl"
+#line 94 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 81;
 }}
 	break;
 	case 115:
-#line 298 "skt_translit_iast_slp1.rl"
+#line 362 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 72;
 }}
 	break;
 	case 116:
-#line 298 "skt_translit_iast_slp1.rl"
+#line 362 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 72;
 }}
 	break;
 	case 117:
-#line 324 "skt_translit_iast_slp1.rl"
+#line 249 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 124;
 }}
 	break;
 	case 118:
-#line 324 "skt_translit_iast_slp1.rl"
+#line 249 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 124;
 }}
 	break;
 	case 119:
-#line 19 "skt_translit_iast_slp1.rl"
+#line 345 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7260,7 +7448,7 @@ _eof_trans:
 }}
 	break;
 	case 120:
-#line 187 "skt_translit_iast_slp1.rl"
+#line 179 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7268,21 +7456,21 @@ _eof_trans:
 }}
 	break;
 	case 121:
-#line 324 "skt_translit_iast_slp1.rl"
+#line 249 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 124;
 }}
 	break;
 	case 122:
-#line 324 "skt_translit_iast_slp1.rl"
+#line 249 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 124;
 }}
 	break;
 	case 123:
-#line 19 "skt_translit_iast_slp1.rl"
+#line 345 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7290,7 +7478,7 @@ _eof_trans:
 }}
 	break;
 	case 124:
-#line 187 "skt_translit_iast_slp1.rl"
+#line 179 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7298,7 +7486,7 @@ _eof_trans:
 }}
 	break;
 	case 125:
-#line 388 "skt_translit_iast_slp1.rl"
+#line 323 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7306,7 +7494,7 @@ _eof_trans:
 }}
 	break;
 	case 126:
-#line 84 "skt_translit_iast_slp1.rl"
+#line 292 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7314,7 +7502,7 @@ _eof_trans:
 }}
 	break;
 	case 127:
-#line 388 "skt_translit_iast_slp1.rl"
+#line 323 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7322,7 +7510,7 @@ _eof_trans:
 }}
 	break;
 	case 128:
-#line 84 "skt_translit_iast_slp1.rl"
+#line 292 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7330,63 +7518,63 @@ _eof_trans:
 }}
 	break;
 	case 129:
-#line 208 "skt_translit_iast_slp1.rl"
+#line 79 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 76;
 }}
 	break;
 	case 130:
-#line 208 "skt_translit_iast_slp1.rl"
+#line 79 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 76;
 }}
 	break;
 	case 131:
-#line 355 "skt_translit_iast_slp1.rl"
+#line 74 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 77;
 }}
 	break;
 	case 132:
-#line 355 "skt_translit_iast_slp1.rl"
+#line 74 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 77;
 }}
 	break;
 	case 133:
-#line 150 "skt_translit_iast_slp1.rl"
+#line 254 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 78;
 }}
 	break;
 	case 134:
-#line 150 "skt_translit_iast_slp1.rl"
+#line 254 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 78;
 }}
 	break;
 	case 135:
-#line 171 "skt_translit_iast_slp1.rl"
+#line 389 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 82;
 }}
 	break;
 	case 136:
-#line 171 "skt_translit_iast_slp1.rl"
+#line 389 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 82;
 }}
 	break;
 	case 137:
-#line 432 "skt_translit_iast_slp1.rl"
+#line 173 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7394,7 +7582,7 @@ _eof_trans:
 }}
 	break;
 	case 138:
-#line 225 "skt_translit_iast_slp1.rl"
+#line 127 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7402,7 +7590,7 @@ _eof_trans:
 }}
 	break;
 	case 139:
-#line 432 "skt_translit_iast_slp1.rl"
+#line 173 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7410,7 +7598,7 @@ _eof_trans:
 }}
 	break;
 	case 140:
-#line 225 "skt_translit_iast_slp1.rl"
+#line 127 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7418,7 +7606,7 @@ _eof_trans:
 }}
 	break;
 	case 141:
-#line 313 "skt_translit_iast_slp1.rl"
+#line 259 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7426,7 +7614,7 @@ _eof_trans:
 }}
 	break;
 	case 142:
-#line 155 "skt_translit_iast_slp1.rl"
+#line 20 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7434,7 +7622,7 @@ _eof_trans:
 }}
 	break;
 	case 143:
-#line 313 "skt_translit_iast_slp1.rl"
+#line 259 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 94;
@@ -7442,7 +7630,7 @@ _eof_trans:
 }}
 	break;
 	case 144:
-#line 155 "skt_translit_iast_slp1.rl"
+#line 20 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7450,42 +7638,42 @@ _eof_trans:
 }}
 	break;
 	case 145:
-#line 251 "skt_translit_iast_slp1.rl"
+#line 207 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 122;
 }}
 	break;
 	case 146:
-#line 251 "skt_translit_iast_slp1.rl"
+#line 207 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 122;
 }}
 	break;
 	case 147:
-#line 47 "skt_translit_iast_slp1.rl"
+#line 270 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 87;
 }}
 	break;
 	case 148:
-#line 47 "skt_translit_iast_slp1.rl"
+#line 270 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 87;
 }}
 	break;
 	case 149:
-#line 47 "skt_translit_iast_slp1.rl"
+#line 270 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 87;
 }}
 	break;
 	case 150:
-#line 47 "skt_translit_iast_slp1.rl"
+#line 270 "skt_translit_iast_slp1.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 87;
@@ -7499,56 +7687,56 @@ _eof_trans:
    }}
 	break;
 	case 152:
-#line 288 "skt_translit_iast_slp1.rl"
+#line 428 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 97;
 }}
 	break;
 	case 153:
-#line 176 "skt_translit_iast_slp1.rl"
+#line 443 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 98;
 }}
 	break;
 	case 154:
-#line 345 "skt_translit_iast_slp1.rl"
+#line 303 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 99;
 }}
 	break;
 	case 155:
-#line 166 "skt_translit_iast_slp1.rl"
+#line 433 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 100;
 }}
 	break;
 	case 156:
-#line 443 "skt_translit_iast_slp1.rl"
+#line 138 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 103;
 }}
 	break;
 	case 157:
-#line 421 "skt_translit_iast_slp1.rl"
+#line 351 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 106;
 }}
 	break;
 	case 158:
-#line 303 "skt_translit_iast_slp1.rl"
+#line 148 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 107;
 }}
 	break;
 	case 159:
-#line 426 "skt_translit_iast_slp1.rl"
+#line 416 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7556,182 +7744,182 @@ _eof_trans:
 }}
 	break;
 	case 160:
-#line 198 "skt_translit_iast_slp1.rl"
+#line 275 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 120;
 }}
 	break;
 	case 161:
-#line 394 "skt_translit_iast_slp1.rl"
+#line 143 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 112;
 }}
 	break;
 	case 162:
-#line 203 "skt_translit_iast_slp1.rl"
+#line 378 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 114;
 }}
 	break;
 	case 163:
-#line 266 "skt_translit_iast_slp1.rl"
+#line 116 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 102;
 }}
 	break;
 	case 164:
-#line 293 "skt_translit_iast_slp1.rl"
+#line 32 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 116;
 }}
 	break;
 	case 165:
-#line 198 "skt_translit_iast_slp1.rl"
+#line 275 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 120;
 }}
 	break;
 	case 166:
-#line 266 "skt_translit_iast_slp1.rl"
+#line 116 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 102;
 }}
 	break;
 	case 167:
-#line 79 "skt_translit_iast_slp1.rl"
+#line 367 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 46;
 }}
 	break;
 	case 168:
-#line 340 "skt_translit_iast_slp1.rl"
+#line 153 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 65;
 }}
 	break;
 	case 169:
-#line 340 "skt_translit_iast_slp1.rl"
+#line 153 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 65;
 }}
 	break;
 	case 170:
-#line 74 "skt_translit_iast_slp1.rl"
+#line 48 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 73;
 }}
 	break;
 	case 171:
-#line 74 "skt_translit_iast_slp1.rl"
+#line 48 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 73;
 }}
 	break;
 	case 172:
-#line 383 "skt_translit_iast_slp1.rl"
+#line 84 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 85;
 }}
 	break;
 	case 173:
-#line 383 "skt_translit_iast_slp1.rl"
+#line 84 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 85;
 }}
 	break;
 	case 174:
-#line 140 "skt_translit_iast_slp1.rl"
+#line 43 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 113;
 }}
 	break;
 	case 175:
-#line 140 "skt_translit_iast_slp1.rl"
+#line 43 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 113;
 }}
 	break;
 	case 176:
-#line 198 "skt_translit_iast_slp1.rl"
+#line 275 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 120;
 }}
 	break;
 	case 177:
-#line 198 "skt_translit_iast_slp1.rl"
+#line 275 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 120;
 }}
 	break;
 	case 178:
-#line 123 "skt_translit_iast_slp1.rl"
+#line 228 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 88;
 }}
 	break;
 	case 179:
-#line 123 "skt_translit_iast_slp1.rl"
+#line 228 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 88;
 }}
 	break;
 	case 180:
-#line 266 "skt_translit_iast_slp1.rl"
+#line 116 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 102;
 }}
 	break;
 	case 181:
-#line 266 "skt_translit_iast_slp1.rl"
+#line 116 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 102;
 }}
 	break;
 	case 182:
-#line 256 "skt_translit_iast_slp1.rl"
+#line 89 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 70;
 }}
 	break;
 	case 183:
-#line 256 "skt_translit_iast_slp1.rl"
+#line 89 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 70;
 }}
 	break;
 	case 184:
-#line 236 "skt_translit_iast_slp1.rl"
+#line 163 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 119;
 }}
 	break;
 	case 185:
-#line 236 "skt_translit_iast_slp1.rl"
+#line 163 "skt_translit_iast_slp1.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 119;
@@ -7745,14 +7933,14 @@ _eof_trans:
    }}
 	break;
 	case 187:
-#line 288 "skt_translit_iast_slp1.rl"
+#line 428 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 97;
 }}
 	break;
 	case 188:
-#line 426 "skt_translit_iast_slp1.rl"
+#line 416 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
@@ -7760,133 +7948,133 @@ _eof_trans:
 }}
 	break;
 	case 189:
-#line 198 "skt_translit_iast_slp1.rl"
+#line 275 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 120;
 }}
 	break;
 	case 190:
-#line 203 "skt_translit_iast_slp1.rl"
+#line 378 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 114;
 }}
 	break;
 	case 191:
-#line 266 "skt_translit_iast_slp1.rl"
+#line 116 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 102;
 }}
 	break;
 	case 192:
-#line 198 "skt_translit_iast_slp1.rl"
+#line 275 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 120;
 }}
 	break;
 	case 193:
-#line 266 "skt_translit_iast_slp1.rl"
+#line 116 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 102;
 }}
 	break;
 	case 194:
-#line 340 "skt_translit_iast_slp1.rl"
+#line 153 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 65;
 }}
 	break;
 	case 195:
-#line 340 "skt_translit_iast_slp1.rl"
+#line 153 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 65;
 }}
 	break;
 	case 196:
-#line 74 "skt_translit_iast_slp1.rl"
+#line 48 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 73;
 }}
 	break;
 	case 197:
-#line 74 "skt_translit_iast_slp1.rl"
+#line 48 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 73;
 }}
 	break;
 	case 198:
-#line 383 "skt_translit_iast_slp1.rl"
+#line 84 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 85;
 }}
 	break;
 	case 199:
-#line 383 "skt_translit_iast_slp1.rl"
+#line 84 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 85;
 }}
 	break;
 	case 200:
-#line 198 "skt_translit_iast_slp1.rl"
+#line 275 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 120;
 }}
 	break;
 	case 201:
-#line 198 "skt_translit_iast_slp1.rl"
+#line 275 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 120;
 }}
 	break;
 	case 202:
-#line 123 "skt_translit_iast_slp1.rl"
+#line 228 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 88;
 }}
 	break;
 	case 203:
-#line 123 "skt_translit_iast_slp1.rl"
+#line 228 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 88;
 }}
 	break;
 	case 204:
-#line 266 "skt_translit_iast_slp1.rl"
+#line 116 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 102;
 }}
 	break;
 	case 205:
-#line 266 "skt_translit_iast_slp1.rl"
+#line 116 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 102;
 }}
 	break;
 	case 206:
-#line 256 "skt_translit_iast_slp1.rl"
+#line 89 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 70;
 }}
 	break;
 	case 207:
-#line 256 "skt_translit_iast_slp1.rl"
+#line 89 "skt_translit_iast_slp1.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 70;
@@ -8137,7 +8325,7 @@ _eof_trans:
 		switch ( *_acts++ )
 		{
 	case 2:
-#line 76 "skt_translit_velthuis_iastc.rl"
+#line 149 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -8146,7 +8334,7 @@ _eof_trans:
 }}
 	break;
 	case 3:
-#line 211 "skt_translit_velthuis_iastc.rl"
+#line 204 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -8155,7 +8343,7 @@ _eof_trans:
 }}
 	break;
 	case 4:
-#line 138 "skt_translit_velthuis_iastc.rl"
+#line 46 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 76;
@@ -8166,7 +8354,7 @@ _eof_trans:
 }}
 	break;
 	case 5:
-#line 138 "skt_translit_velthuis_iastc.rl"
+#line 46 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 76;
@@ -8177,7 +8365,7 @@ _eof_trans:
 }}
 	break;
 	case 6:
-#line 96 "skt_translit_velthuis_iastc.rl"
+#line 122 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -8186,7 +8374,7 @@ _eof_trans:
 }}
 	break;
 	case 7:
-#line 83 "skt_translit_velthuis_iastc.rl"
+#line 129 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -8195,7 +8383,7 @@ _eof_trans:
 }}
 	break;
 	case 8:
-#line 116 "skt_translit_velthuis_iastc.rl"
+#line 92 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 82;
@@ -8206,7 +8394,7 @@ _eof_trans:
 }}
 	break;
 	case 9:
-#line 116 "skt_translit_velthuis_iastc.rl"
+#line 92 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 82;
@@ -8217,7 +8405,7 @@ _eof_trans:
 }}
 	break;
 	case 10:
-#line 224 "skt_translit_velthuis_iastc.rl"
+#line 163 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -8226,7 +8414,7 @@ _eof_trans:
 }}
 	break;
 	case 11:
-#line 103 "skt_translit_velthuis_iastc.rl"
+#line 55 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -8235,7 +8423,7 @@ _eof_trans:
 }}
 	break;
 	case 12:
-#line 147 "skt_translit_velthuis_iastc.rl"
+#line 85 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -8244,7 +8432,7 @@ _eof_trans:
 }}
 	break;
 	case 13:
-#line 183 "skt_translit_velthuis_iastc.rl"
+#line 62 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -8253,7 +8441,7 @@ _eof_trans:
 }}
 	break;
 	case 14:
-#line 154 "skt_translit_velthuis_iastc.rl"
+#line 76 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 108;
@@ -8264,7 +8452,7 @@ _eof_trans:
 }}
 	break;
 	case 15:
-#line 163 "skt_translit_velthuis_iastc.rl"
+#line 39 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -8273,7 +8461,7 @@ _eof_trans:
 }}
 	break;
 	case 16:
-#line 197 "skt_translit_velthuis_iastc.rl"
+#line 115 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -8282,7 +8470,7 @@ _eof_trans:
 }}
 	break;
 	case 17:
-#line 28 "skt_translit_velthuis_iastc.rl"
+#line 176 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 114;
@@ -8293,7 +8481,7 @@ _eof_trans:
 }}
 	break;
 	case 18:
-#line 21 "skt_translit_velthuis_iastc.rl"
+#line 156 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -8302,7 +8490,7 @@ _eof_trans:
 }}
 	break;
 	case 19:
-#line 190 "skt_translit_velthuis_iastc.rl"
+#line 136 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -8311,7 +8499,7 @@ _eof_trans:
 }}
 	break;
 	case 20:
-#line 90 "skt_translit_velthuis_iastc.rl"
+#line 14 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 196;
@@ -8319,7 +8507,7 @@ _eof_trans:
 }}
 	break;
 	case 21:
-#line 90 "skt_translit_velthuis_iastc.rl"
+#line 14 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 196;
@@ -8327,7 +8515,7 @@ _eof_trans:
 }}
 	break;
 	case 22:
-#line 204 "skt_translit_velthuis_iastc.rl"
+#line 108 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -8336,7 +8524,7 @@ _eof_trans:
 }}
 	break;
 	case 23:
-#line 57 "skt_translit_velthuis_iastc.rl"
+#line 20 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 196;
@@ -8344,7 +8532,7 @@ _eof_trans:
 }}
 	break;
 	case 24:
-#line 57 "skt_translit_velthuis_iastc.rl"
+#line 20 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 196;
@@ -8352,7 +8540,7 @@ _eof_trans:
 }}
 	break;
 	case 25:
-#line 110 "skt_translit_velthuis_iastc.rl"
+#line 185 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 197;
@@ -8360,7 +8548,7 @@ _eof_trans:
 }}
 	break;
 	case 26:
-#line 110 "skt_translit_velthuis_iastc.rl"
+#line 185 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 197;
@@ -8368,7 +8556,7 @@ _eof_trans:
 }}
 	break;
 	case 27:
-#line 44 "skt_translit_velthuis_iastc.rl"
+#line 33 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 197;
@@ -8376,7 +8564,7 @@ _eof_trans:
 }}
 	break;
 	case 28:
-#line 63 "skt_translit_velthuis_iastc.rl"
+#line 143 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 196;
@@ -8384,7 +8572,7 @@ _eof_trans:
 }}
 	break;
 	case 29:
-#line 8 "skt_translit_velthuis_iastc.rl"
+#line 197 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -8409,7 +8597,7 @@ _eof_trans:
 }}
 	break;
 	case 32:
-#line 15 "skt_translit_velthuis_iastc.rl"
+#line 231 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 197;
@@ -8417,7 +8605,7 @@ _eof_trans:
 }}
 	break;
 	case 33:
-#line 132 "skt_translit_velthuis_iastc.rl"
+#line 8 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -8425,7 +8613,7 @@ _eof_trans:
 }}
 	break;
 	case 34:
-#line 231 "skt_translit_velthuis_iastc.rl"
+#line 191 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -8433,7 +8621,7 @@ _eof_trans:
 }}
 	break;
 	case 35:
-#line 125 "skt_translit_velthuis_iastc.rl"
+#line 224 "skt_translit_velthuis_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -8449,7 +8637,7 @@ _eof_trans:
    }}
 	break;
 	case 37:
-#line 50 "skt_translit_velthuis_iastc.rl"
+#line 26 "skt_translit_velthuis_iastc.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 76;
@@ -8458,7 +8646,7 @@ _eof_trans:
 }}
 	break;
 	case 38:
-#line 37 "skt_translit_velthuis_iastc.rl"
+#line 211 "skt_translit_velthuis_iastc.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 82;
@@ -8467,7 +8655,7 @@ _eof_trans:
 }}
 	break;
 	case 39:
-#line 176 "skt_translit_velthuis_iastc.rl"
+#line 101 "skt_translit_velthuis_iastc.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 108;
@@ -8755,7 +8943,7 @@ _eof_trans:
 	{te = p+1;}
 	break;
 	case 3:
-#line 95 "skt_translit_iast_velthuis.rl"
+#line 56 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 46;
@@ -8764,7 +8952,7 @@ _eof_trans:
 }}
 	break;
 	case 4:
-#line 26 "skt_translit_iast_velthuis.rl"
+#line 106 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 46;
@@ -8782,7 +8970,7 @@ _eof_trans:
 }}
 	break;
 	case 6:
-#line 39 "skt_translit_iast_velthuis.rl"
+#line 69 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 46;
@@ -8791,7 +8979,7 @@ _eof_trans:
 }}
 	break;
 	case 7:
-#line 140 "skt_translit_iast_velthuis.rl"
+#line 14 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 126;
@@ -8799,7 +8987,7 @@ _eof_trans:
 }}
 	break;
 	case 8:
-#line 76 "skt_translit_iast_velthuis.rl"
+#line 194 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 126;
@@ -8807,7 +8995,7 @@ _eof_trans:
 }}
 	break;
 	case 9:
-#line 152 "skt_translit_iast_velthuis.rl"
+#line 118 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 65;
@@ -8815,7 +9003,7 @@ _eof_trans:
 }}
 	break;
 	case 10:
-#line 14 "skt_translit_iast_velthuis.rl"
+#line 147 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 97;
@@ -8823,7 +9011,7 @@ _eof_trans:
 }}
 	break;
 	case 11:
-#line 33 "skt_translit_iast_velthuis.rl"
+#line 100 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 73;
@@ -8831,7 +9019,7 @@ _eof_trans:
 }}
 	break;
 	case 12:
-#line 194 "skt_translit_iast_velthuis.rl"
+#line 182 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 105;
@@ -8846,14 +9034,14 @@ _eof_trans:
 }}
 	break;
 	case 14:
-#line 108 "skt_translit_iast_velthuis.rl"
+#line 95 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 122;
 }}
 	break;
 	case 15:
-#line 146 "skt_translit_iast_velthuis.rl"
+#line 170 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 85;
@@ -8861,7 +9049,7 @@ _eof_trans:
 }}
 	break;
 	case 16:
-#line 46 "skt_translit_iast_velthuis.rl"
+#line 63 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 117;
@@ -8869,7 +9057,7 @@ _eof_trans:
 }}
 	break;
 	case 17:
-#line 102 "skt_translit_iast_velthuis.rl"
+#line 200 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -8877,7 +9065,7 @@ _eof_trans:
 }}
 	break;
 	case 18:
-#line 182 "skt_translit_iast_velthuis.rl"
+#line 159 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -8885,7 +9073,7 @@ _eof_trans:
 }}
 	break;
 	case 19:
-#line 200 "skt_translit_iast_velthuis.rl"
+#line 129 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -8893,7 +9081,7 @@ _eof_trans:
 }}
 	break;
 	case 20:
-#line 164 "skt_translit_iast_velthuis.rl"
+#line 50 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -8901,7 +9089,7 @@ _eof_trans:
 }}
 	break;
 	case 21:
-#line 118 "skt_translit_iast_velthuis.rl"
+#line 153 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -8909,7 +9097,7 @@ _eof_trans:
 }}
 	break;
 	case 22:
-#line 20 "skt_translit_iast_velthuis.rl"
+#line 76 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -8917,7 +9105,7 @@ _eof_trans:
 }}
 	break;
 	case 23:
-#line 95 "skt_translit_iast_velthuis.rl"
+#line 56 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 46;
@@ -8935,7 +9123,7 @@ _eof_trans:
 }}
 	break;
 	case 25:
-#line 64 "skt_translit_iast_velthuis.rl"
+#line 20 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 126;
@@ -8943,7 +9131,7 @@ _eof_trans:
 }}
 	break;
 	case 26:
-#line 64 "skt_translit_iast_velthuis.rl"
+#line 20 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 126;
@@ -8951,7 +9139,7 @@ _eof_trans:
 }}
 	break;
 	case 27:
-#line 52 "skt_translit_iast_velthuis.rl"
+#line 32 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -8959,7 +9147,7 @@ _eof_trans:
 }}
 	break;
 	case 28:
-#line 8 "skt_translit_iast_velthuis.rl"
+#line 176 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -8967,21 +9155,21 @@ _eof_trans:
 }}
 	break;
 	case 29:
-#line 113 "skt_translit_iast_velthuis.rl"
+#line 165 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 70;
 }}
 	break;
 	case 30:
-#line 129 "skt_translit_iast_velthuis.rl"
+#line 113 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 1);
    buf->data[buf->size++] = 102;
 }}
 	break;
 	case 31:
-#line 188 "skt_translit_iast_velthuis.rl"
+#line 38 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -8989,7 +9177,7 @@ _eof_trans:
 }}
 	break;
 	case 32:
-#line 170 "skt_translit_iast_velthuis.rl"
+#line 188 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -8997,7 +9185,7 @@ _eof_trans:
 }}
 	break;
 	case 33:
-#line 70 "skt_translit_iast_velthuis.rl"
+#line 26 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -9005,7 +9193,7 @@ _eof_trans:
 }}
 	break;
 	case 34:
-#line 58 "skt_translit_iast_velthuis.rl"
+#line 8 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -9013,7 +9201,7 @@ _eof_trans:
 }}
 	break;
 	case 35:
-#line 26 "skt_translit_iast_velthuis.rl"
+#line 106 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 46;
@@ -9022,7 +9210,7 @@ _eof_trans:
 }}
 	break;
 	case 36:
-#line 39 "skt_translit_iast_velthuis.rl"
+#line 69 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 46;
@@ -9031,7 +9219,7 @@ _eof_trans:
 }}
 	break;
 	case 37:
-#line 134 "skt_translit_iast_velthuis.rl"
+#line 44 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -9039,7 +9227,7 @@ _eof_trans:
 }}
 	break;
 	case 38:
-#line 176 "skt_translit_iast_velthuis.rl"
+#line 135 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -9055,7 +9243,7 @@ _eof_trans:
 }}
 	break;
 	case 40:
-#line 158 "skt_translit_iast_velthuis.rl"
+#line 141 "skt_translit_iast_velthuis.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -9070,7 +9258,7 @@ _eof_trans:
    }}
 	break;
 	case 42:
-#line 118 "skt_translit_iast_velthuis.rl"
+#line 153 "skt_translit_iast_velthuis.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -9078,7 +9266,7 @@ _eof_trans:
 }}
 	break;
 	case 43:
-#line 70 "skt_translit_iast_velthuis.rl"
+#line 26 "skt_translit_iast_velthuis.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -9086,7 +9274,7 @@ _eof_trans:
 }}
 	break;
 	case 44:
-#line 20 "skt_translit_iast_velthuis.rl"
+#line 76 "skt_translit_iast_velthuis.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -9094,7 +9282,7 @@ _eof_trans:
 }}
 	break;
 	case 45:
-#line 58 "skt_translit_iast_velthuis.rl"
+#line 8 "skt_translit_iast_velthuis.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -9109,7 +9297,7 @@ _eof_trans:
    }}
 	break;
 	case 47:
-#line 118 "skt_translit_iast_velthuis.rl"
+#line 153 "skt_translit_iast_velthuis.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -9117,7 +9305,7 @@ _eof_trans:
 }}
 	break;
 	case 48:
-#line 70 "skt_translit_iast_velthuis.rl"
+#line 26 "skt_translit_iast_velthuis.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -9125,7 +9313,7 @@ _eof_trans:
 }}
 	break;
 	case 49:
-#line 20 "skt_translit_iast_velthuis.rl"
+#line 76 "skt_translit_iast_velthuis.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -9133,7 +9321,7 @@ _eof_trans:
 }}
 	break;
 	case 50:
-#line 58 "skt_translit_iast_velthuis.rl"
+#line 8 "skt_translit_iast_velthuis.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -9385,7 +9573,7 @@ _eof_trans:
 		switch ( *_acts++ )
 		{
 	case 2:
-#line 68 "skt_translit_velthuis_iast.rl"
+#line 48 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9394,7 +9582,7 @@ _eof_trans:
 }}
 	break;
 	case 3:
-#line 122 "skt_translit_velthuis_iast.rl"
+#line 21 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9403,7 +9591,7 @@ _eof_trans:
 }}
 	break;
 	case 4:
-#line 89 "skt_translit_velthuis_iast.rl"
+#line 55 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9412,7 +9600,7 @@ _eof_trans:
 }}
 	break;
 	case 5:
-#line 89 "skt_translit_velthuis_iast.rl"
+#line 55 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9421,7 +9609,7 @@ _eof_trans:
 }}
 	break;
 	case 6:
-#line 183 "skt_translit_velthuis_iast.rl"
+#line 210 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9430,7 +9618,7 @@ _eof_trans:
 }}
 	break;
 	case 7:
-#line 162 "skt_translit_velthuis_iast.rl"
+#line 170 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9439,7 +9627,7 @@ _eof_trans:
 }}
 	break;
 	case 8:
-#line 61 "skt_translit_velthuis_iast.rl"
+#line 83 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9448,7 +9636,7 @@ _eof_trans:
 }}
 	break;
 	case 9:
-#line 61 "skt_translit_velthuis_iast.rl"
+#line 83 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9457,7 +9645,7 @@ _eof_trans:
 }}
 	break;
 	case 10:
-#line 169 "skt_translit_velthuis_iast.rl"
+#line 41 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9466,7 +9654,7 @@ _eof_trans:
 }}
 	break;
 	case 11:
-#line 15 "skt_translit_velthuis_iast.rl"
+#line 117 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9475,7 +9663,7 @@ _eof_trans:
 }}
 	break;
 	case 12:
-#line 102 "skt_translit_velthuis_iast.rl"
+#line 14 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9484,7 +9672,7 @@ _eof_trans:
 }}
 	break;
 	case 13:
-#line 176 "skt_translit_velthuis_iast.rl"
+#line 130 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9493,7 +9681,7 @@ _eof_trans:
 }}
 	break;
 	case 14:
-#line 82 "skt_translit_velthuis_iast.rl"
+#line 156 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9502,7 +9690,7 @@ _eof_trans:
 }}
 	break;
 	case 15:
-#line 222 "skt_translit_velthuis_iast.rl"
+#line 62 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9511,7 +9699,7 @@ _eof_trans:
 }}
 	break;
 	case 16:
-#line 42 "skt_translit_velthuis_iast.rl"
+#line 34 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9520,7 +9708,7 @@ _eof_trans:
 }}
 	break;
 	case 17:
-#line 142 "skt_translit_velthuis_iast.rl"
+#line 97 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9529,7 +9717,7 @@ _eof_trans:
 }}
 	break;
 	case 18:
-#line 109 "skt_translit_velthuis_iast.rl"
+#line 110 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9538,7 +9726,7 @@ _eof_trans:
 }}
 	break;
 	case 19:
-#line 35 "skt_translit_velthuis_iast.rl"
+#line 90 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9547,7 +9735,7 @@ _eof_trans:
 }}
 	break;
 	case 20:
-#line 96 "skt_translit_velthuis_iast.rl"
+#line 223 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 196;
@@ -9555,7 +9743,7 @@ _eof_trans:
 }}
 	break;
 	case 21:
-#line 96 "skt_translit_velthuis_iast.rl"
+#line 223 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 196;
@@ -9563,7 +9751,7 @@ _eof_trans:
 }}
 	break;
 	case 22:
-#line 215 "skt_translit_velthuis_iast.rl"
+#line 203 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9572,7 +9760,7 @@ _eof_trans:
 }}
 	break;
 	case 23:
-#line 55 "skt_translit_velthuis_iast.rl"
+#line 197 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 196;
@@ -9580,7 +9768,7 @@ _eof_trans:
 }}
 	break;
 	case 24:
-#line 55 "skt_translit_velthuis_iast.rl"
+#line 197 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 196;
@@ -9588,7 +9776,7 @@ _eof_trans:
 }}
 	break;
 	case 25:
-#line 149 "skt_translit_velthuis_iast.rl"
+#line 28 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 197;
@@ -9596,7 +9784,7 @@ _eof_trans:
 }}
 	break;
 	case 26:
-#line 149 "skt_translit_velthuis_iast.rl"
+#line 28 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 197;
@@ -9604,7 +9792,7 @@ _eof_trans:
 }}
 	break;
 	case 27:
-#line 202 "skt_translit_velthuis_iast.rl"
+#line 177 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 197;
@@ -9612,7 +9800,7 @@ _eof_trans:
 }}
 	break;
 	case 28:
-#line 29 "skt_translit_velthuis_iast.rl"
+#line 124 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 196;
@@ -9620,7 +9808,7 @@ _eof_trans:
 }}
 	break;
 	case 29:
-#line 155 "skt_translit_velthuis_iast.rl"
+#line 76 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9629,7 +9817,7 @@ _eof_trans:
 }}
 	break;
 	case 30:
-#line 116 "skt_translit_velthuis_iast.rl"
+#line 8 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 196;
@@ -9637,7 +9825,7 @@ _eof_trans:
 }}
 	break;
 	case 31:
-#line 49 "skt_translit_velthuis_iast.rl"
+#line 217 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 197;
@@ -9645,7 +9833,7 @@ _eof_trans:
 }}
 	break;
 	case 32:
-#line 196 "skt_translit_velthuis_iast.rl"
+#line 143 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 197;
@@ -9653,7 +9841,7 @@ _eof_trans:
 }}
 	break;
 	case 33:
-#line 129 "skt_translit_velthuis_iast.rl"
+#line 137 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -9661,7 +9849,7 @@ _eof_trans:
 }}
 	break;
 	case 34:
-#line 190 "skt_translit_velthuis_iast.rl"
+#line 104 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 195;
@@ -9669,7 +9857,7 @@ _eof_trans:
 }}
 	break;
 	case 35:
-#line 8 "skt_translit_velthuis_iast.rl"
+#line 190 "skt_translit_velthuis_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9685,7 +9873,7 @@ _eof_trans:
    }}
 	break;
 	case 37:
-#line 75 "skt_translit_velthuis_iast.rl"
+#line 163 "skt_translit_velthuis_iast.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9694,7 +9882,7 @@ _eof_trans:
 }}
 	break;
 	case 38:
-#line 22 "skt_translit_velthuis_iast.rl"
+#line 183 "skt_translit_velthuis_iast.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9703,7 +9891,7 @@ _eof_trans:
 }}
 	break;
 	case 39:
-#line 208 "skt_translit_velthuis_iast.rl"
+#line 149 "skt_translit_velthuis_iast.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9712,7 +9900,7 @@ _eof_trans:
 }}
 	break;
 	case 40:
-#line 135 "skt_translit_velthuis_iast.rl"
+#line 69 "skt_translit_velthuis_iast.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -9939,7 +10127,7 @@ _eof_trans:
 	{te = p+1;}
 	break;
 	case 3:
-#line 56 "skt_translit_iast_iastc.rl"
+#line 65 "skt_translit_iast_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 76;
@@ -9948,7 +10136,7 @@ _eof_trans:
 }}
 	break;
 	case 4:
-#line 8 "skt_translit_iast_iastc.rl"
+#line 31 "skt_translit_iast_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 108;
@@ -9957,7 +10145,7 @@ _eof_trans:
 }}
 	break;
 	case 5:
-#line 63 "skt_translit_iast_iastc.rl"
+#line 56 "skt_translit_iast_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 76;
@@ -9979,7 +10167,7 @@ _eof_trans:
 }}
 	break;
 	case 7:
-#line 15 "skt_translit_iast_iastc.rl"
+#line 8 "skt_translit_iast_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 82;
@@ -9988,7 +10176,7 @@ _eof_trans:
 }}
 	break;
 	case 8:
-#line 22 "skt_translit_iast_iastc.rl"
+#line 24 "skt_translit_iast_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 114;
@@ -9997,7 +10185,7 @@ _eof_trans:
 }}
 	break;
 	case 9:
-#line 29 "skt_translit_iast_iastc.rl"
+#line 38 "skt_translit_iast_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 82;
@@ -10008,7 +10196,7 @@ _eof_trans:
 }}
 	break;
 	case 10:
-#line 38 "skt_translit_iast_iastc.rl"
+#line 15 "skt_translit_iast_iastc.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 5);
    buf->data[buf->size++] = 114;
@@ -10797,7 +10985,7 @@ static const char *const skt_maps_description[NUM_SCHEMES][NUM_SCHEMES] = {
 
 #line 1 "skt_sort.rl"
 
-#line 796 "skt_sort.rl"
+#line 801 "skt_sort.rl"
 
 
 void skt_sort_key(struct skt_buf *buf, const char *str, size_t len)
@@ -10848,170 +11036,185 @@ static const unsigned char _skt_sort_key_actions[] = {
 	131, 1, 132, 1, 133, 1, 134, 1, 
 	135, 1, 136, 1, 137, 1, 138, 1, 
 	139, 1, 140, 1, 141, 1, 142, 1, 
-	143
+	143, 1, 144, 1, 145, 1, 146
 };
 
 static const unsigned char _skt_sort_key_key_offsets[] = {
 	0, 1, 2, 3, 4, 5, 6, 7, 
-	8, 16, 30, 76, 80, 82, 84, 86, 
-	88, 90, 92, 93, 94, 96, 97, 98, 
-	100, 104, 106, 108, 110, 112, 114, 116, 
-	117, 118, 120, 121, 122, 124, 126, 130, 
-	134, 136, 138, 140, 142
+	8, 16, 30, 37, 38, 91, 92, 96, 
+	98, 100, 102, 104, 106, 108, 109, 110, 
+	112, 113, 114, 116, 120, 122, 124, 126, 
+	128, 130, 132, 133, 134, 136, 137, 138, 
+	140, 142, 144, 148, 152, 154, 156, 158, 
+	160, 162
 };
 
 static const unsigned char _skt_sort_key_trans_keys[] = {
 	165u, 132u, 165u, 132u, 165u, 132u, 165u, 132u, 
 	140u, 141u, 164u, 165u, 182u, 183u, 184u, 185u, 
 	130u, 131u, 132u, 133u, 134u, 135u, 154u, 155u, 
-	156u, 157u, 162u, 163u, 172u, 173u, 65u, 66u, 
-	67u, 68u, 69u, 71u, 72u, 73u, 74u, 75u, 
-	76u, 77u, 78u, 79u, 80u, 82u, 83u, 84u, 
-	85u, 86u, 89u, 97u, 98u, 99u, 100u, 101u, 
-	103u, 104u, 105u, 106u, 107u, 108u, 109u, 110u, 
-	111u, 112u, 114u, 115u, 116u, 117u, 118u, 121u, 
-	195u, 196u, 197u, 225u, 73u, 85u, 105u, 117u, 
+	156u, 157u, 162u, 163u, 172u, 173u, 175u, 128u, 
+	139u, 147u, 148u, 168u, 169u, 159u, 13u, 32u, 
+	45u, 65u, 66u, 67u, 68u, 69u, 71u, 72u, 
+	73u, 74u, 75u, 76u, 77u, 78u, 79u, 80u, 
+	82u, 83u, 84u, 85u, 86u, 89u, 97u, 98u, 
+	99u, 100u, 101u, 103u, 104u, 105u, 106u, 107u, 
+	108u, 109u, 110u, 111u, 112u, 114u, 115u, 116u, 
+	117u, 118u, 121u, 194u, 195u, 196u, 197u, 225u, 
+	226u, 9u, 12u, 10u, 73u, 85u, 105u, 117u, 
 	72u, 104u, 72u, 104u, 72u, 104u, 72u, 104u, 
 	72u, 104u, 72u, 104u, 204u, 204u, 72u, 104u, 
 	204u, 204u, 72u, 104u, 73u, 85u, 105u, 117u, 
 	72u, 104u, 72u, 104u, 72u, 104u, 72u, 104u, 
 	72u, 104u, 72u, 104u, 204u, 204u, 72u, 104u, 
-	204u, 204u, 72u, 104u, 145u, 177u, 128u, 129u, 
-	170u, 171u, 154u, 155u, 170u, 171u, 184u, 185u, 
-	72u, 104u, 72u, 104u, 72u, 104u, 72u, 104u, 
-	0
+	204u, 204u, 72u, 104u, 133u, 160u, 145u, 177u, 
+	128u, 129u, 170u, 171u, 154u, 155u, 170u, 171u, 
+	184u, 185u, 72u, 104u, 72u, 104u, 72u, 104u, 
+	72u, 104u, 128u, 129u, 0
 };
 
 static const char _skt_sort_key_single_lengths[] = {
 	1, 1, 1, 1, 1, 1, 1, 1, 
-	8, 14, 46, 4, 2, 2, 2, 2, 
+	8, 14, 1, 1, 51, 1, 4, 2, 
+	2, 2, 2, 2, 2, 1, 1, 2, 
+	1, 1, 2, 4, 2, 2, 2, 2, 
 	2, 2, 1, 1, 2, 1, 1, 2, 
-	4, 2, 2, 2, 2, 2, 2, 1, 
-	1, 2, 1, 1, 2, 2, 4, 4, 
-	2, 2, 2, 2, 2
+	2, 2, 4, 4, 2, 2, 2, 2, 
+	2, 2
 };
 
 static const char _skt_sort_key_range_lengths[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 3, 0, 1, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0
+	0, 0
 };
 
-static const unsigned char _skt_sort_key_index_offsets[] = {
+static const short _skt_sort_key_index_offsets[] = {
 	0, 2, 4, 6, 8, 10, 12, 14, 
-	16, 25, 40, 87, 92, 95, 98, 101, 
-	104, 107, 110, 112, 114, 117, 119, 121, 
-	124, 129, 132, 135, 138, 141, 144, 147, 
-	149, 151, 154, 156, 158, 161, 164, 169, 
-	174, 177, 180, 183, 186
+	16, 25, 40, 45, 47, 100, 102, 107, 
+	110, 113, 116, 119, 122, 125, 127, 129, 
+	132, 134, 136, 139, 144, 147, 150, 153, 
+	156, 159, 162, 164, 166, 169, 171, 173, 
+	176, 179, 182, 187, 192, 195, 198, 201, 
+	204, 207
 };
 
 static const char _skt_sort_key_trans_targs[] = {
-	19, 10, 10, 10, 22, 10, 10, 10, 
-	32, 10, 10, 10, 35, 10, 10, 10, 
-	41, 42, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 43, 44, 10, 
-	11, 12, 13, 14, 10, 15, 10, 10, 
-	16, 17, 18, 10, 10, 10, 20, 21, 
-	10, 23, 10, 10, 10, 24, 25, 26, 
-	27, 10, 28, 10, 10, 29, 30, 31, 
-	10, 10, 10, 33, 34, 10, 36, 10, 
-	10, 10, 37, 38, 39, 40, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 0, 10, 
-	1, 10, 10, 10, 10, 2, 10, 3, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 4, 10, 5, 10, 10, 
-	10, 10, 6, 10, 7, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 8, 9, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 0
+	22, 12, 12, 12, 25, 12, 12, 12, 
+	35, 12, 12, 12, 38, 12, 12, 12, 
+	45, 46, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 47, 48, 12, 
+	12, 12, 12, 12, 12, 12, 12, 13, 
+	12, 12, 14, 15, 16, 17, 12, 18, 
+	12, 12, 19, 20, 21, 12, 12, 12, 
+	23, 24, 12, 26, 12, 12, 12, 27, 
+	28, 29, 30, 12, 31, 12, 12, 32, 
+	33, 34, 12, 12, 12, 36, 37, 12, 
+	39, 12, 12, 12, 40, 41, 42, 43, 
+	44, 49, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 0, 12, 1, 
+	12, 12, 12, 12, 2, 12, 3, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 4, 12, 5, 12, 12, 12, 
+	12, 6, 12, 7, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	8, 9, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 10, 
+	11, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 0
 };
 
 static const short _skt_sort_key_trans_actions[] = {
-	5, 283, 47, 275, 5, 279, 31, 271, 
-	5, 285, 49, 277, 5, 281, 33, 273, 
+	5, 289, 47, 281, 5, 285, 31, 277, 
+	5, 291, 49, 283, 5, 287, 33, 279, 
 	0, 0, 79, 81, 39, 41, 43, 45, 
-	287, 75, 77, 99, 101, 139, 141, 27, 
-	29, 35, 37, 195, 197, 0, 0, 287, 
-	0, 0, 0, 0, 51, 0, 203, 11, 
-	0, 0, 5, 179, 159, 63, 0, 5, 
-	199, 0, 19, 187, 183, 0, 0, 0, 
-	0, 53, 0, 205, 13, 0, 0, 5, 
-	181, 161, 65, 0, 5, 201, 0, 21, 
-	189, 185, 0, 0, 0, 5, 207, 55, 
-	67, 57, 69, 209, 171, 173, 257, 103, 
-	105, 229, 151, 153, 249, 91, 93, 225, 
-	111, 113, 233, 83, 85, 221, 0, 265, 
-	0, 217, 163, 165, 253, 0, 261, 0, 
-	213, 143, 145, 245, 59, 71, 61, 73, 
-	211, 175, 177, 259, 107, 109, 231, 155, 
-	157, 251, 95, 97, 227, 115, 117, 235, 
-	87, 89, 223, 0, 267, 0, 219, 167, 
-	169, 255, 0, 263, 0, 215, 147, 149, 
-	247, 119, 121, 269, 7, 9, 15, 17, 
-	269, 191, 193, 23, 25, 269, 0, 0, 
-	269, 131, 133, 241, 135, 137, 243, 123, 
-	125, 237, 127, 129, 239, 283, 275, 279, 
-	271, 285, 277, 281, 273, 287, 287, 209, 
-	257, 229, 249, 225, 233, 221, 265, 217, 
-	253, 261, 213, 245, 211, 259, 231, 251, 
-	227, 235, 223, 267, 219, 255, 263, 215, 
-	247, 269, 269, 269, 269, 241, 243, 237, 
-	239, 0
+	293, 75, 77, 99, 101, 139, 141, 27, 
+	29, 35, 37, 195, 197, 0, 0, 293, 
+	209, 209, 207, 209, 293, 209, 293, 0, 
+	209, 207, 0, 0, 0, 0, 51, 0, 
+	203, 11, 0, 0, 5, 179, 159, 63, 
+	0, 5, 199, 0, 19, 187, 183, 0, 
+	0, 0, 0, 53, 0, 205, 13, 0, 
+	0, 5, 181, 161, 65, 0, 5, 201, 
+	0, 21, 189, 185, 0, 0, 0, 0, 
+	5, 5, 209, 211, 209, 273, 55, 67, 
+	57, 69, 213, 171, 173, 261, 103, 105, 
+	233, 151, 153, 253, 91, 93, 229, 111, 
+	113, 237, 83, 85, 225, 0, 269, 0, 
+	221, 163, 165, 257, 0, 265, 0, 217, 
+	143, 145, 249, 59, 71, 61, 73, 215, 
+	175, 177, 263, 107, 109, 235, 155, 157, 
+	255, 95, 97, 231, 115, 117, 239, 87, 
+	89, 227, 0, 271, 0, 223, 167, 169, 
+	259, 0, 267, 0, 219, 147, 149, 251, 
+	209, 209, 275, 119, 121, 275, 7, 9, 
+	15, 17, 275, 191, 193, 23, 25, 275, 
+	0, 0, 275, 131, 133, 245, 135, 137, 
+	247, 123, 125, 241, 127, 129, 243, 0, 
+	0, 275, 289, 281, 285, 277, 291, 283, 
+	287, 279, 293, 293, 293, 293, 273, 213, 
+	261, 233, 253, 229, 237, 225, 269, 221, 
+	257, 265, 217, 249, 215, 263, 235, 255, 
+	231, 239, 227, 271, 223, 259, 267, 219, 
+	251, 275, 275, 275, 275, 275, 245, 247, 
+	241, 243, 275, 0
 };
 
 static const short _skt_sort_key_to_state_actions[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 1, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 1, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0
 };
 
 static const short _skt_sort_key_from_state_actions[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 3, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 3, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0
 };
 
-static const unsigned char _skt_sort_key_eof_trans[] = {
-	190, 191, 192, 193, 194, 195, 196, 197, 
-	199, 199, 0, 200, 201, 202, 203, 204, 
-	205, 206, 207, 208, 209, 210, 211, 212, 
-	213, 214, 215, 216, 217, 218, 219, 220, 
-	221, 222, 223, 224, 225, 229, 229, 229, 
-	229, 230, 231, 232, 233
+static const short _skt_sort_key_eof_trans[] = {
+	211, 212, 213, 214, 215, 216, 217, 218, 
+	222, 222, 222, 222, 0, 223, 224, 225, 
+	226, 227, 228, 229, 230, 231, 232, 233, 
+	234, 235, 236, 237, 238, 239, 240, 241, 
+	242, 243, 244, 245, 246, 247, 248, 249, 
+	259, 259, 259, 259, 259, 255, 256, 257, 
+	258, 259
 };
 
-static const int skt_sort_key_start = 10;
-static const int skt_sort_key_first_final = 10;
+static const int skt_sort_key_start = 12;
+static const int skt_sort_key_first_final = 12;
 static const int skt_sort_key_error = -1;
 
-static const int skt_sort_key_en_main = 10;
+static const int skt_sort_key_en_main = 12;
 
 
-#line 808 "skt_sort.rl"
+#line 813 "skt_sort.rl"
    
-#line 219 "skt_sort.ic"
+#line 234 "skt_sort.ic"
 	{
 	cs = skt_sort_key_start;
 	ts = 0;
@@ -11019,9 +11222,9 @@ static const int skt_sort_key_en_main = 10;
 	act = 0;
 	}
 
-#line 809 "skt_sort.rl"
+#line 814 "skt_sort.rl"
    
-#line 229 "skt_sort.ic"
+#line 244 "skt_sort.ic"
 	{
 	int _klen;
 	unsigned int _trans;
@@ -11040,7 +11243,7 @@ _resume:
 #line 1 "NONE"
 	{ts = p;}
 	break;
-#line 248 "skt_sort.ic"
+#line 263 "skt_sort.ic"
 		}
 	}
 
@@ -11110,7 +11313,7 @@ _eof_trans:
 	{te = p+1;}
 	break;
 	case 3:
-#line 17 "skt_sort.rl"
+#line 20 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 2;
@@ -11118,7 +11321,7 @@ _eof_trans:
 }}
 	break;
 	case 4:
-#line 22 "skt_sort.rl"
+#line 25 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 2;
@@ -11126,7 +11329,7 @@ _eof_trans:
 }}
 	break;
 	case 5:
-#line 27 "skt_sort.rl"
+#line 30 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 3;
@@ -11134,7 +11337,7 @@ _eof_trans:
 }}
 	break;
 	case 6:
-#line 32 "skt_sort.rl"
+#line 35 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 3;
@@ -11142,7 +11345,7 @@ _eof_trans:
 }}
 	break;
 	case 7:
-#line 37 "skt_sort.rl"
+#line 40 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 4;
@@ -11150,7 +11353,7 @@ _eof_trans:
 }}
 	break;
 	case 8:
-#line 42 "skt_sort.rl"
+#line 45 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 4;
@@ -11158,7 +11361,7 @@ _eof_trans:
 }}
 	break;
 	case 9:
-#line 47 "skt_sort.rl"
+#line 50 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 5;
@@ -11166,7 +11369,7 @@ _eof_trans:
 }}
 	break;
 	case 10:
-#line 52 "skt_sort.rl"
+#line 55 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 5;
@@ -11174,7 +11377,7 @@ _eof_trans:
 }}
 	break;
 	case 11:
-#line 57 "skt_sort.rl"
+#line 60 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 6;
@@ -11182,7 +11385,7 @@ _eof_trans:
 }}
 	break;
 	case 12:
-#line 62 "skt_sort.rl"
+#line 65 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 6;
@@ -11190,7 +11393,7 @@ _eof_trans:
 }}
 	break;
 	case 13:
-#line 77 "skt_sort.rl"
+#line 80 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 8;
@@ -11198,7 +11401,7 @@ _eof_trans:
 }}
 	break;
 	case 14:
-#line 82 "skt_sort.rl"
+#line 85 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 8;
@@ -11206,7 +11409,7 @@ _eof_trans:
 }}
 	break;
 	case 15:
-#line 87 "skt_sort.rl"
+#line 90 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 9;
@@ -11214,7 +11417,7 @@ _eof_trans:
 }}
 	break;
 	case 16:
-#line 92 "skt_sort.rl"
+#line 95 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 9;
@@ -11222,7 +11425,7 @@ _eof_trans:
 }}
 	break;
 	case 17:
-#line 97 "skt_sort.rl"
+#line 100 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 10;
@@ -11230,7 +11433,7 @@ _eof_trans:
 }}
 	break;
 	case 18:
-#line 102 "skt_sort.rl"
+#line 105 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 10;
@@ -11238,7 +11441,7 @@ _eof_trans:
 }}
 	break;
 	case 19:
-#line 117 "skt_sort.rl"
+#line 120 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 12;
@@ -11246,7 +11449,7 @@ _eof_trans:
 }}
 	break;
 	case 20:
-#line 122 "skt_sort.rl"
+#line 125 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 12;
@@ -11254,7 +11457,7 @@ _eof_trans:
 }}
 	break;
 	case 21:
-#line 127 "skt_sort.rl"
+#line 130 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 13;
@@ -11262,7 +11465,7 @@ _eof_trans:
 }}
 	break;
 	case 22:
-#line 132 "skt_sort.rl"
+#line 135 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 13;
@@ -11270,7 +11473,7 @@ _eof_trans:
 }}
 	break;
 	case 23:
-#line 137 "skt_sort.rl"
+#line 140 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 14;
@@ -11278,7 +11481,7 @@ _eof_trans:
 }}
 	break;
 	case 24:
-#line 142 "skt_sort.rl"
+#line 145 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 14;
@@ -11286,7 +11489,7 @@ _eof_trans:
 }}
 	break;
 	case 25:
-#line 147 "skt_sort.rl"
+#line 150 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 15;
@@ -11294,7 +11497,7 @@ _eof_trans:
 }}
 	break;
 	case 26:
-#line 152 "skt_sort.rl"
+#line 155 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 15;
@@ -11302,7 +11505,7 @@ _eof_trans:
 }}
 	break;
 	case 27:
-#line 157 "skt_sort.rl"
+#line 160 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 16;
@@ -11310,7 +11513,7 @@ _eof_trans:
 }}
 	break;
 	case 28:
-#line 162 "skt_sort.rl"
+#line 165 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 16;
@@ -11318,7 +11521,7 @@ _eof_trans:
 }}
 	break;
 	case 29:
-#line 167 "skt_sort.rl"
+#line 170 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 16;
@@ -11326,7 +11529,7 @@ _eof_trans:
 }}
 	break;
 	case 30:
-#line 172 "skt_sort.rl"
+#line 175 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 16;
@@ -11334,7 +11537,7 @@ _eof_trans:
 }}
 	break;
 	case 31:
-#line 177 "skt_sort.rl"
+#line 180 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 17;
@@ -11342,7 +11545,7 @@ _eof_trans:
 }}
 	break;
 	case 32:
-#line 182 "skt_sort.rl"
+#line 185 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 17;
@@ -11350,7 +11553,7 @@ _eof_trans:
 }}
 	break;
 	case 33:
-#line 187 "skt_sort.rl"
+#line 190 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 18;
@@ -11358,7 +11561,7 @@ _eof_trans:
 }}
 	break;
 	case 34:
-#line 192 "skt_sort.rl"
+#line 195 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 18;
@@ -11366,7 +11569,7 @@ _eof_trans:
 }}
 	break;
 	case 35:
-#line 197 "skt_sort.rl"
+#line 200 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 18;
@@ -11374,7 +11577,7 @@ _eof_trans:
 }}
 	break;
 	case 36:
-#line 202 "skt_sort.rl"
+#line 205 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 18;
@@ -11382,7 +11585,7 @@ _eof_trans:
 }}
 	break;
 	case 37:
-#line 207 "skt_sort.rl"
+#line 210 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 19;
@@ -11390,7 +11593,7 @@ _eof_trans:
 }}
 	break;
 	case 38:
-#line 212 "skt_sort.rl"
+#line 215 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 19;
@@ -11398,7 +11601,7 @@ _eof_trans:
 }}
 	break;
 	case 39:
-#line 217 "skt_sort.rl"
+#line 220 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 20;
@@ -11406,7 +11609,7 @@ _eof_trans:
 }}
 	break;
 	case 40:
-#line 222 "skt_sort.rl"
+#line 225 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 20;
@@ -11414,7 +11617,7 @@ _eof_trans:
 }}
 	break;
 	case 41:
-#line 237 "skt_sort.rl"
+#line 240 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 22;
@@ -11422,7 +11625,7 @@ _eof_trans:
 }}
 	break;
 	case 42:
-#line 242 "skt_sort.rl"
+#line 245 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 22;
@@ -11430,7 +11633,7 @@ _eof_trans:
 }}
 	break;
 	case 43:
-#line 247 "skt_sort.rl"
+#line 250 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 22;
@@ -11438,7 +11641,7 @@ _eof_trans:
 }}
 	break;
 	case 44:
-#line 252 "skt_sort.rl"
+#line 255 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 22;
@@ -11446,7 +11649,7 @@ _eof_trans:
 }}
 	break;
 	case 45:
-#line 267 "skt_sort.rl"
+#line 270 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 24;
@@ -11454,7 +11657,7 @@ _eof_trans:
 }}
 	break;
 	case 46:
-#line 272 "skt_sort.rl"
+#line 275 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 24;
@@ -11462,7 +11665,7 @@ _eof_trans:
 }}
 	break;
 	case 47:
-#line 277 "skt_sort.rl"
+#line 280 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 24;
@@ -11470,7 +11673,7 @@ _eof_trans:
 }}
 	break;
 	case 48:
-#line 282 "skt_sort.rl"
+#line 285 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 24;
@@ -11478,7 +11681,7 @@ _eof_trans:
 }}
 	break;
 	case 49:
-#line 287 "skt_sort.rl"
+#line 290 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 25;
@@ -11486,7 +11689,7 @@ _eof_trans:
 }}
 	break;
 	case 50:
-#line 292 "skt_sort.rl"
+#line 295 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 25;
@@ -11494,7 +11697,7 @@ _eof_trans:
 }}
 	break;
 	case 51:
-#line 307 "skt_sort.rl"
+#line 310 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 27;
@@ -11502,7 +11705,7 @@ _eof_trans:
 }}
 	break;
 	case 52:
-#line 312 "skt_sort.rl"
+#line 315 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 27;
@@ -11510,7 +11713,7 @@ _eof_trans:
 }}
 	break;
 	case 53:
-#line 317 "skt_sort.rl"
+#line 320 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 27;
@@ -11518,7 +11721,7 @@ _eof_trans:
 }}
 	break;
 	case 54:
-#line 322 "skt_sort.rl"
+#line 325 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 27;
@@ -11526,7 +11729,7 @@ _eof_trans:
 }}
 	break;
 	case 55:
-#line 337 "skt_sort.rl"
+#line 340 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 29;
@@ -11534,7 +11737,7 @@ _eof_trans:
 }}
 	break;
 	case 56:
-#line 342 "skt_sort.rl"
+#line 345 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 29;
@@ -11542,7 +11745,7 @@ _eof_trans:
 }}
 	break;
 	case 57:
-#line 347 "skt_sort.rl"
+#line 350 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 29;
@@ -11550,7 +11753,7 @@ _eof_trans:
 }}
 	break;
 	case 58:
-#line 352 "skt_sort.rl"
+#line 355 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 29;
@@ -11558,7 +11761,7 @@ _eof_trans:
 }}
 	break;
 	case 59:
-#line 357 "skt_sort.rl"
+#line 360 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 30;
@@ -11566,7 +11769,7 @@ _eof_trans:
 }}
 	break;
 	case 60:
-#line 362 "skt_sort.rl"
+#line 365 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 30;
@@ -11574,7 +11777,7 @@ _eof_trans:
 }}
 	break;
 	case 61:
-#line 377 "skt_sort.rl"
+#line 380 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 32;
@@ -11582,7 +11785,7 @@ _eof_trans:
 }}
 	break;
 	case 62:
-#line 382 "skt_sort.rl"
+#line 385 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 32;
@@ -11590,7 +11793,7 @@ _eof_trans:
 }}
 	break;
 	case 63:
-#line 387 "skt_sort.rl"
+#line 390 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 32;
@@ -11598,7 +11801,7 @@ _eof_trans:
 }}
 	break;
 	case 64:
-#line 392 "skt_sort.rl"
+#line 395 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 32;
@@ -11606,7 +11809,7 @@ _eof_trans:
 }}
 	break;
 	case 65:
-#line 407 "skt_sort.rl"
+#line 410 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 34;
@@ -11614,7 +11817,7 @@ _eof_trans:
 }}
 	break;
 	case 66:
-#line 412 "skt_sort.rl"
+#line 415 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 34;
@@ -11622,7 +11825,7 @@ _eof_trans:
 }}
 	break;
 	case 67:
-#line 417 "skt_sort.rl"
+#line 420 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 34;
@@ -11630,7 +11833,7 @@ _eof_trans:
 }}
 	break;
 	case 68:
-#line 422 "skt_sort.rl"
+#line 425 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 34;
@@ -11638,7 +11841,7 @@ _eof_trans:
 }}
 	break;
 	case 69:
-#line 427 "skt_sort.rl"
+#line 430 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 35;
@@ -11646,7 +11849,7 @@ _eof_trans:
 }}
 	break;
 	case 70:
-#line 432 "skt_sort.rl"
+#line 435 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 35;
@@ -11654,7 +11857,7 @@ _eof_trans:
 }}
 	break;
 	case 71:
-#line 447 "skt_sort.rl"
+#line 450 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 37;
@@ -11662,7 +11865,7 @@ _eof_trans:
 }}
 	break;
 	case 72:
-#line 452 "skt_sort.rl"
+#line 455 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 37;
@@ -11670,7 +11873,7 @@ _eof_trans:
 }}
 	break;
 	case 73:
-#line 457 "skt_sort.rl"
+#line 460 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 37;
@@ -11678,7 +11881,7 @@ _eof_trans:
 }}
 	break;
 	case 74:
-#line 462 "skt_sort.rl"
+#line 465 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 37;
@@ -11686,7 +11889,7 @@ _eof_trans:
 }}
 	break;
 	case 75:
-#line 477 "skt_sort.rl"
+#line 480 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 39;
@@ -11694,7 +11897,7 @@ _eof_trans:
 }}
 	break;
 	case 76:
-#line 482 "skt_sort.rl"
+#line 485 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 39;
@@ -11702,7 +11905,7 @@ _eof_trans:
 }}
 	break;
 	case 77:
-#line 487 "skt_sort.rl"
+#line 490 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 39;
@@ -11710,7 +11913,7 @@ _eof_trans:
 }}
 	break;
 	case 78:
-#line 492 "skt_sort.rl"
+#line 495 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 39;
@@ -11718,7 +11921,7 @@ _eof_trans:
 }}
 	break;
 	case 79:
-#line 497 "skt_sort.rl"
+#line 500 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 40;
@@ -11726,7 +11929,7 @@ _eof_trans:
 }}
 	break;
 	case 80:
-#line 502 "skt_sort.rl"
+#line 505 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 40;
@@ -11734,7 +11937,7 @@ _eof_trans:
 }}
 	break;
 	case 81:
-#line 517 "skt_sort.rl"
+#line 520 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 42;
@@ -11742,7 +11945,7 @@ _eof_trans:
 }}
 	break;
 	case 82:
-#line 522 "skt_sort.rl"
+#line 525 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 42;
@@ -11750,7 +11953,7 @@ _eof_trans:
 }}
 	break;
 	case 83:
-#line 527 "skt_sort.rl"
+#line 530 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 42;
@@ -11758,7 +11961,7 @@ _eof_trans:
 }}
 	break;
 	case 84:
-#line 532 "skt_sort.rl"
+#line 535 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 42;
@@ -11766,7 +11969,7 @@ _eof_trans:
 }}
 	break;
 	case 85:
-#line 547 "skt_sort.rl"
+#line 550 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 44;
@@ -11774,7 +11977,7 @@ _eof_trans:
 }}
 	break;
 	case 86:
-#line 552 "skt_sort.rl"
+#line 555 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 44;
@@ -11782,7 +11985,7 @@ _eof_trans:
 }}
 	break;
 	case 87:
-#line 557 "skt_sort.rl"
+#line 560 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 44;
@@ -11790,7 +11993,7 @@ _eof_trans:
 }}
 	break;
 	case 88:
-#line 562 "skt_sort.rl"
+#line 565 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 44;
@@ -11798,7 +12001,7 @@ _eof_trans:
 }}
 	break;
 	case 89:
-#line 567 "skt_sort.rl"
+#line 570 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 45;
@@ -11806,7 +12009,7 @@ _eof_trans:
 }}
 	break;
 	case 90:
-#line 572 "skt_sort.rl"
+#line 575 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 45;
@@ -11814,7 +12017,7 @@ _eof_trans:
 }}
 	break;
 	case 91:
-#line 577 "skt_sort.rl"
+#line 580 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -11822,7 +12025,7 @@ _eof_trans:
 }}
 	break;
 	case 92:
-#line 582 "skt_sort.rl"
+#line 585 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -11830,7 +12033,7 @@ _eof_trans:
 }}
 	break;
 	case 93:
-#line 607 "skt_sort.rl"
+#line 610 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 49;
@@ -11838,7 +12041,7 @@ _eof_trans:
 }}
 	break;
 	case 94:
-#line 612 "skt_sort.rl"
+#line 615 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 49;
@@ -11846,7 +12049,7 @@ _eof_trans:
 }}
 	break;
 	case 95:
-#line 617 "skt_sort.rl"
+#line 620 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 50;
@@ -11854,7 +12057,7 @@ _eof_trans:
 }}
 	break;
 	case 96:
-#line 622 "skt_sort.rl"
+#line 625 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 50;
@@ -11862,7 +12065,7 @@ _eof_trans:
 }}
 	break;
 	case 97:
-#line 627 "skt_sort.rl"
+#line 630 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 51;
@@ -11870,7 +12073,7 @@ _eof_trans:
 }}
 	break;
 	case 98:
-#line 632 "skt_sort.rl"
+#line 635 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 51;
@@ -11878,7 +12081,7 @@ _eof_trans:
 }}
 	break;
 	case 99:
-#line 637 "skt_sort.rl"
+#line 640 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 52;
@@ -11886,7 +12089,7 @@ _eof_trans:
 }}
 	break;
 	case 100:
-#line 642 "skt_sort.rl"
+#line 645 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 52;
@@ -11894,7 +12097,7 @@ _eof_trans:
 }}
 	break;
 	case 101:
-#line 647 "skt_sort.rl"
+#line 650 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 53;
@@ -11902,7 +12105,7 @@ _eof_trans:
 }}
 	break;
 	case 102:
-#line 652 "skt_sort.rl"
+#line 655 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 53;
@@ -11910,334 +12113,346 @@ _eof_trans:
 }}
 	break;
 	case 103:
-#line 789 "skt_sort.rl"
+#line 792 "skt_sort.rl"
+	{te = p+1;}
+	break;
+	case 104:
+#line 793 "skt_sort.rl"
+	{te = p+1;}
+	break;
+	case 105:
+#line 794 "skt_sort.rl"
 	{te = p+1;{
       skt_buf_grow(buf, 2);
       buf->data[buf->size++] = 0xff;
       buf->data[buf->size++] = *p;
    }}
 	break;
-	case 104:
-#line 7 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 1;
-   buf->data[buf->size++] = 1;
-}}
-	break;
-	case 105:
-#line 12 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 1;
-   buf->data[buf->size++] = 2;
-}}
-	break;
 	case 106:
-#line 67 "skt_sort.rl"
+#line 10 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 7;
+   buf->data[buf->size++] = 1;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 107:
-#line 72 "skt_sort.rl"
+#line 15 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 7;
+   buf->data[buf->size++] = 1;
    buf->data[buf->size++] = 2;
 }}
 	break;
 	case 108:
-#line 107 "skt_sort.rl"
+#line 70 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 11;
+   buf->data[buf->size++] = 7;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 109:
-#line 112 "skt_sort.rl"
+#line 75 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 11;
+   buf->data[buf->size++] = 7;
    buf->data[buf->size++] = 2;
 }}
 	break;
 	case 110:
-#line 227 "skt_sort.rl"
+#line 110 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 21;
+   buf->data[buf->size++] = 11;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 111:
-#line 232 "skt_sort.rl"
+#line 115 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 11;
+   buf->data[buf->size++] = 2;
+}}
+	break;
+	case 112:
+#line 230 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 21;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 113:
+#line 235 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 21;
    buf->data[buf->size++] = 2;
 }}
 	break;
-	case 112:
-#line 257 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 23;
-   buf->data[buf->size++] = 1;
-}}
-	break;
-	case 113:
-#line 262 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 23;
-   buf->data[buf->size++] = 2;
-}}
-	break;
 	case 114:
-#line 297 "skt_sort.rl"
+#line 260 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 26;
+   buf->data[buf->size++] = 23;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 115:
-#line 302 "skt_sort.rl"
+#line 265 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 23;
+   buf->data[buf->size++] = 2;
+}}
+	break;
+	case 116:
+#line 300 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 26;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 117:
+#line 305 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 26;
    buf->data[buf->size++] = 2;
 }}
 	break;
-	case 116:
-#line 327 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 28;
-   buf->data[buf->size++] = 1;
-}}
-	break;
-	case 117:
-#line 332 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 28;
-   buf->data[buf->size++] = 2;
-}}
-	break;
 	case 118:
-#line 367 "skt_sort.rl"
+#line 330 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 31;
+   buf->data[buf->size++] = 28;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 119:
-#line 372 "skt_sort.rl"
+#line 335 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 28;
+   buf->data[buf->size++] = 2;
+}}
+	break;
+	case 120:
+#line 370 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 31;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 121:
+#line 375 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 31;
    buf->data[buf->size++] = 2;
 }}
 	break;
-	case 120:
-#line 397 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 33;
-   buf->data[buf->size++] = 1;
-}}
-	break;
-	case 121:
-#line 402 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 33;
-   buf->data[buf->size++] = 2;
-}}
-	break;
 	case 122:
-#line 437 "skt_sort.rl"
+#line 400 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 36;
+   buf->data[buf->size++] = 33;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 123:
-#line 442 "skt_sort.rl"
+#line 405 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 33;
+   buf->data[buf->size++] = 2;
+}}
+	break;
+	case 124:
+#line 440 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 36;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 125:
+#line 445 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 36;
    buf->data[buf->size++] = 2;
 }}
 	break;
-	case 124:
-#line 467 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 38;
-   buf->data[buf->size++] = 1;
-}}
-	break;
-	case 125:
-#line 472 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 38;
-   buf->data[buf->size++] = 2;
-}}
-	break;
 	case 126:
-#line 507 "skt_sort.rl"
+#line 470 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 41;
+   buf->data[buf->size++] = 38;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 127:
-#line 512 "skt_sort.rl"
+#line 475 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 38;
+   buf->data[buf->size++] = 2;
+}}
+	break;
+	case 128:
+#line 510 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 41;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 129:
+#line 515 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 41;
    buf->data[buf->size++] = 2;
 }}
 	break;
-	case 128:
-#line 537 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 43;
-   buf->data[buf->size++] = 1;
-}}
-	break;
-	case 129:
-#line 542 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 43;
-   buf->data[buf->size++] = 2;
-}}
-	break;
 	case 130:
-#line 587 "skt_sort.rl"
+#line 540 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 47;
+   buf->data[buf->size++] = 43;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 131:
-#line 592 "skt_sort.rl"
+#line 545 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 47;
+   buf->data[buf->size++] = 43;
    buf->data[buf->size++] = 2;
 }}
 	break;
 	case 132:
-#line 597 "skt_sort.rl"
+#line 590 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 48;
+   buf->data[buf->size++] = 47;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 133:
-#line 602 "skt_sort.rl"
+#line 595 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 48;
+   buf->data[buf->size++] = 47;
    buf->data[buf->size++] = 2;
 }}
 	break;
 	case 134:
-#line 789 "skt_sort.rl"
+#line 600 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 48;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 135:
+#line 605 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 48;
+   buf->data[buf->size++] = 2;
+}}
+	break;
+	case 136:
+#line 793 "skt_sort.rl"
+	{te = p;p--;}
+	break;
+	case 137:
+#line 794 "skt_sort.rl"
 	{te = p;p--;{
       skt_buf_grow(buf, 2);
       buf->data[buf->size++] = 0xff;
       buf->data[buf->size++] = *p;
    }}
 	break;
-	case 135:
-#line 67 "skt_sort.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 7;
-   buf->data[buf->size++] = 1;
-}}
-	break;
-	case 136:
-#line 72 "skt_sort.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 7;
-   buf->data[buf->size++] = 2;
-}}
-	break;
-	case 137:
-#line 107 "skt_sort.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 11;
-   buf->data[buf->size++] = 1;
-}}
-	break;
 	case 138:
-#line 112 "skt_sort.rl"
+#line 70 "skt_sort.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 11;
-   buf->data[buf->size++] = 2;
+   buf->data[buf->size++] = 7;
+   buf->data[buf->size++] = 1;
 }}
 	break;
 	case 139:
-#line 587 "skt_sort.rl"
+#line 75 "skt_sort.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 47;
-   buf->data[buf->size++] = 1;
+   buf->data[buf->size++] = 7;
+   buf->data[buf->size++] = 2;
 }}
 	break;
 	case 140:
-#line 592 "skt_sort.rl"
+#line 110 "skt_sort.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 11;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 141:
+#line 115 "skt_sort.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 11;
+   buf->data[buf->size++] = 2;
+}}
+	break;
+	case 142:
+#line 590 "skt_sort.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 47;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 143:
+#line 595 "skt_sort.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
    buf->data[buf->size++] = 2;
 }}
 	break;
-	case 141:
-#line 597 "skt_sort.rl"
+	case 144:
+#line 600 "skt_sort.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 48;
    buf->data[buf->size++] = 1;
 }}
 	break;
-	case 142:
-#line 602 "skt_sort.rl"
+	case 145:
+#line 605 "skt_sort.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 48;
    buf->data[buf->size++] = 2;
 }}
 	break;
-	case 143:
-#line 789 "skt_sort.rl"
+	case 146:
+#line 794 "skt_sort.rl"
 	{{p = ((te))-1;}{
       skt_buf_grow(buf, 2);
       buf->data[buf->size++] = 0xff;
       buf->data[buf->size++] = *p;
    }}
 	break;
-#line 1445 "skt_sort.ic"
+#line 1472 "skt_sort.ic"
 		}
 	}
 
@@ -12250,7 +12465,7 @@ _again:
 #line 1 "NONE"
 	{ts = 0;}
 	break;
-#line 1458 "skt_sort.ic"
+#line 1485 "skt_sort.ic"
 		}
 	}
 
@@ -12267,7 +12482,7 @@ _again:
 
 	}
 
-#line 810 "skt_sort.rl"
+#line 815 "skt_sort.rl"
    skt_buf_truncate(buf, buf->size);
 }
 
@@ -12291,192 +12506,4 @@ const char *skt_map_description(const char *input_scheme,
    if (input < NUM_SCHEMES && output < NUM_SCHEMES)
       return skt_maps_description[input][output];
    return ""; 
-}
-#include <string.h>
-#ifndef SKT_MEM_H
-#define SKT_MEM_H
-
-#include <stddef.h>
-#include <assert.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <stdnoreturn.h>
-
-noreturn void skt_fatal(const char *msg, ...);
-
-void *skt_malloc(size_t size)
-#ifdef ___GNUC__
-   __attribute__((malloc))
-#endif
-   ;
-
-void *skt_calloc(size_t nmemb, size_t size)
-#ifdef ___GNUC__
-   __attribute__((malloc))
-#endif
-   ;
-
-void *skt_realloc(void *mem, size_t size);
-
-/* For reallocating arrays.
- * data: the array proper.
- * size: current number of elements.
- * alloc: current allocated memory (must be initialized to 0).
- * more: number of elements to reserve.
- * init: initial number of elements to allocate.
- */
-#define SKT_GROW(data, size, alloc, more, init) do {                           \
-   size_t need = size + more;                                                  \
-   if (need < size)                                                            \
-      skt_fatal("integer overflow");                                           \
-   if (need > alloc) {                                                         \
-      if (alloc) {                                                             \
-         alloc += alloc >> 1;                                                  \
-         if (alloc < need)                                                     \
-            alloc = need;                                                      \
-         if (alloc > SIZE_MAX / sizeof *data)                                  \
-            skt_fatal("integer overflow");                                     \
-         data = skt_realloc(data, alloc * sizeof *data);                       \
-      } else {                                                                 \
-         alloc = need < init ? init : need;                                    \
-         if (alloc > SIZE_MAX / sizeof *data)                                  \
-            skt_fatal("integer overflow");                                     \
-         data = skt_malloc(alloc * sizeof *data);                              \
-      }                                                                        \
-   }                                                                           \
-} while (0)
-
-#endif
-
-#define SKT_BUF_INIT_SIZE 16
-
-void skt_buf_grow(struct skt_buf *buf, size_t size)
-{
-   size_t need = buf->size + size + 1;
-   if (need <= buf->size)
-      skt_fatal("integer overflow");
-
-   if (need > buf->alloc) {
-      if (buf->alloc) {
-         buf->alloc += buf->alloc >> 1;
-         if (buf->alloc < need)
-            buf->alloc = need;
-         buf->data = skt_realloc(buf->data, buf->alloc);
-      } else {
-         buf->alloc = need < SKT_BUF_INIT_SIZE ? SKT_BUF_INIT_SIZE : need;
-         buf->data = skt_malloc(buf->alloc);
-      }
-   }
-}
-
-void skt_buf_fini(struct skt_buf *buf)
-{
-   if (buf->alloc)
-      free(buf->data);
-}
-
-void skt_buf_set(struct skt_buf *buf, const void *data, size_t size)
-{
-   skt_buf_clear(buf);
-   skt_buf_cat(buf, data, size);
-}
-
-void skt_buf_sets(struct skt_buf *buf, const char *str)
-{
-   skt_buf_set(buf, str, strlen(str));
-}
-
-void skt_buf_cat(struct skt_buf *buf, const void *data, size_t size)
-{
-   skt_buf_grow(buf, size);
-   memcpy(&buf->data[buf->size], data, size);
-   buf->data[buf->size += size] = '\0';
-}
-
-void skt_buf_catc(struct skt_buf *buf, int c)
-{
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = c;
-   buf->data[buf->size] = '\0';
-}
-
-void skt_buf_cats(struct skt_buf *buf, const char *str)
-{
-   skt_buf_cat(buf, str, strlen(str));
-}
-
-void skt_buf_printf(struct skt_buf *buf, const char *fmt, ...)
-{
-   va_list ap;
-   va_start(ap, fmt);
-   skt_buf_vprintf(buf, fmt, ap);
-   va_end(ap);
-}
-
-static size_t vsnprintf_unsigned(char *buf, size_t size,
-                                 const char *fmt, va_list ap)
-{
-   int len = vsnprintf(buf, size, fmt, ap);
-   return len < 0 ? 0 : len;
-}
-
-void skt_buf_vprintf(struct skt_buf *buf, const char *fmt, va_list ap)
-{
-   va_list copy;
-   va_copy(copy, ap);
-   size_t avail = buf->alloc - buf->size;
-   size_t size = vsnprintf_unsigned(&buf->data[buf->size], avail, fmt, copy);
-   va_end(copy);
-
-   if (size >= avail) {
-      skt_buf_grow(buf, size);
-      avail = buf->alloc - buf->size;
-      size = vsnprintf_unsigned(&buf->data[buf->size], avail, fmt, ap);
-   }
-   buf->size += size;
-}
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-
-noreturn void skt_fatal(const char *msg, ...)
-{
-   va_list ap;
-
-   fputs("skt: ", stderr);
-   va_start(ap, msg);
-   vfprintf(stderr, msg, ap);
-   va_end(ap);
-   putc('\n', stderr);
-   abort();
-}
-
-#define SKT_OOM() skt_fatal("out of memory")
-
-void *skt_malloc(size_t size)
-{
-   assert(size);
-   void *mem = malloc(size);
-   if (!mem)
-      SKT_OOM();
-   return mem;
-}
-
-void *skt_realloc(void *mem, size_t size)
-{
-   assert(size);
-   void *new = realloc(mem, size);
-   if (!new)
-      SKT_OOM();
-   return new;
-}
-
-void *skt_calloc(size_t nmemb, size_t size)
-{
-   assert(nmemb && size);
-   void *mem = calloc(nmemb, size);
-   if (!mem)
-      SKT_OOM();
-   return mem;
 }

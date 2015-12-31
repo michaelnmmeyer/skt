@@ -4,10 +4,15 @@ machine skt_sort_key;
 
 alphtype unsigned char;
 
+include symbol "data/sort/symbol.rl";
+include whitespace "data/sort/whitespace.rl";
+
 $ACTIONS
 
 main := |*
 $RULES
+   dash;
+   whitespace;
    any => {
       skt_buf_grow(buf, 2);
       buf->data[buf->size++] = 0xff;

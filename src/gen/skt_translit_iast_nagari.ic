@@ -293,14 +293,14 @@ static const short _skt_translit_iast_nagari_trans_actions[] = {
 	587, 277, 567, 279, 569, 321, 323, 433, 
 	435, 437, 439, 5, 5, 5, 5, 441, 
 	443, 0, 0, 587, 285, 571, 287, 573, 
-	289, 575, 291, 577, 77, 95, 97, 25, 
-	183, 5, 187, 53, 165, 5, 187, 107, 
-	173, 81, 49, 27, 65, 185, 5, 187, 
-	91, 167, 5, 187, 83, 163, 85, 161, 
-	29, 169, 23, 179, 55, 177, 101, 175, 
-	35, 171, 5, 5, 67, 89, 187, 33, 
-	151, 41, 155, 5, 5, 5, 5, 187, 
-	79, 157, 43, 159, 99, 153, 45, 181, 
+	289, 575, 291, 577, 21, 55, 87, 107, 
+	183, 5, 187, 19, 169, 5, 187, 65, 
+	151, 23, 79, 61, 57, 185, 5, 187, 
+	17, 167, 5, 187, 91, 165, 47, 179, 
+	101, 157, 7, 155, 85, 163, 13, 177, 
+	105, 153, 5, 5, 99, 31, 187, 11, 
+	161, 43, 175, 5, 5, 5, 5, 187, 
+	67, 159, 35, 171, 77, 181, 51, 173, 
 	293, 295, 297, 299, 301, 303, 305, 307, 
 	309, 311, 313, 5, 0, 0, 0, 205, 
 	0, 341, 207, 0, 0, 5, 351, 353, 
@@ -326,33 +326,33 @@ static const short _skt_translit_iast_nagari_trans_actions[] = {
 	423, 533, 425, 427, 535, 0, 479, 0, 
 	481, 0, 483, 0, 485, 0, 487, 0, 
 	489, 445, 447, 537, 449, 451, 539, 5, 
-	57, 73, 5, 61, 5, 9, 5, 59, 
-	31, 5, 69, 5, 37, 0, 0, 0, 
-	5, 111, 109, 51, 75, 93, 0, 145, 
-	0, 149, 0, 127, 0, 149, 0, 135, 
-	13, 47, 17, 21, 0, 147, 0, 149, 
-	0, 129, 0, 149, 0, 125, 39, 63, 
-	71, 103, 105, 19, 11, 7, 87, 15, 
-	149, 5, 5, 5, 5, 149, 0, 123, 
-	0, 131, 0, 141, 0, 139, 5, 5, 
-	149, 0, 137, 0, 133, 0, 0, 149, 
-	0, 113, 0, 117, 0, 119, 0, 121, 
-	0, 115, 0, 143, 543, 579, 547, 581, 
+	27, 9, 5, 71, 5, 59, 5, 83, 
+	75, 5, 53, 5, 69, 0, 0, 0, 
+	5, 111, 49, 97, 93, 109, 0, 145, 
+	0, 149, 0, 131, 0, 149, 0, 113, 
+	73, 103, 89, 15, 0, 147, 0, 149, 
+	0, 129, 0, 149, 0, 127, 39, 63, 
+	25, 45, 29, 37, 33, 41, 81, 95, 
+	149, 5, 5, 5, 5, 149, 0, 141, 
+	0, 119, 0, 117, 0, 125, 5, 5, 
+	149, 0, 139, 0, 115, 0, 0, 149, 
+	0, 123, 0, 137, 0, 121, 0, 133, 
+	0, 143, 0, 135, 543, 579, 547, 581, 
 	549, 545, 583, 551, 585, 553, 555, 557, 
 	559, 561, 563, 565, 587, 567, 569, 587, 
-	571, 573, 575, 577, 183, 187, 165, 187, 
-	173, 185, 187, 167, 187, 163, 161, 169, 
-	179, 177, 175, 171, 187, 151, 155, 187, 
-	157, 159, 153, 181, 455, 493, 495, 497, 
+	571, 573, 575, 577, 183, 187, 169, 187, 
+	151, 185, 187, 167, 187, 165, 179, 157, 
+	155, 163, 177, 153, 187, 161, 175, 187, 
+	159, 171, 181, 173, 455, 493, 495, 497, 
 	499, 501, 503, 505, 459, 507, 509, 461, 
 	511, 457, 513, 515, 517, 519, 521, 523, 
 	525, 463, 527, 529, 465, 531, 491, 541, 
 	541, 467, 469, 471, 473, 541, 475, 477, 
 	541, 533, 535, 479, 481, 483, 485, 487, 
-	489, 537, 539, 145, 149, 127, 149, 135, 
-	147, 149, 129, 149, 125, 149, 149, 123, 
-	131, 141, 139, 149, 137, 133, 149, 113, 
-	117, 119, 121, 115, 143, 0
+	489, 537, 539, 145, 149, 131, 149, 113, 
+	147, 149, 129, 149, 127, 149, 149, 141, 
+	119, 117, 125, 149, 139, 115, 149, 123, 
+	137, 121, 133, 143, 135, 0
 };
 
 static const short _skt_translit_iast_nagari_to_state_actions[] = {
@@ -521,95 +521,6 @@ _eof_trans:
 	{te = p+1;}
 	break;
 	case 3:
-#line 648 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 191;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 4:
-#line 678 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 129;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 5:
-#line 762 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 135;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 6:
-#line 773 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 7:
-#line 686 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 129;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 8:
-#line 773 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 9:
-#line 613 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 10:
-#line 811 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 140;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 11:
 #line 667 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -622,46 +533,7 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 12:
-#line 819 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 140;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 13:
-#line 781 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 14:
-#line 629 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 190;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 15:
+	case 4:
 #line 640 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
@@ -671,7 +543,7 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 16:
+	case 5:
 #line 743 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -684,7 +556,7 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 17:
+	case 6:
 #line 705 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -697,13 +569,141 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 18:
-#line 678 "skt_translit_iast_nagari.rl"
+	case 7:
+#line 811 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 140;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 8:
+#line 838 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 163;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 9:
+#line 838 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 163;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 10:
+#line 781 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 136;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 11:
+#line 781 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 136;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 12:
+#line 648 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 191;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 13:
+#line 754 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 135;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 14:
+#line 686 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 129;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 15:
+#line 838 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 163;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 16:
+#line 762 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 135;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 17:
+#line 724 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 132;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 18:
+#line 613 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -718,6 +718,19 @@ _eof_trans:
 }}
 	break;
 	case 20:
+#line 648 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 191;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 21:
 #line 743 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -730,26 +743,13 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 21:
-#line 724 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 132;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
 	case 22:
-#line 724 "skt_translit_iast_nagari.rl"
+#line 800 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 132;
+   buf->data[buf->size++] = 139;
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 145;
@@ -757,16 +757,52 @@ _eof_trans:
 }}
 	break;
 	case 23:
-#line 811 "skt_translit_iast_nagari.rl"
+#line 629 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
-   skt_buf_grow(buf, 3);
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 190;
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 140;
+   buf->data[buf->size++] = 145;
    {cs = 48; goto _again;}
 }}
 	break;
 	case 24:
+#line 773 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 136;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 25:
+#line 724 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 132;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 26:
+#line 792 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 139;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 27:
 #line 819 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -779,66 +815,39 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 25:
-#line 811 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 140;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 26:
-#line 838 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 163;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 27:
-#line 667 "skt_translit_iast_nagari.rl"
+	case 28:
+#line 819 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 128;
+   buf->data[buf->size++] = 140;
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 145;
    {cs = 48; goto _again;}
 }}
 	break;
-	case 28:
-#line 754 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 135;
-   {cs = 48; goto _again;}
-}}
-	break;
 	case 29:
-#line 754 "skt_translit_iast_nagari.rl"
+#line 678 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 135;
+   buf->data[buf->size++] = 129;
    {cs = 48; goto _again;}
 }}
 	break;
 	case 30:
-#line 792 "skt_translit_iast_nagari.rl"
+#line 781 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
-   skt_buf_grow(buf, 3);
+   skt_buf_grow(buf, 6);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 139;
+   buf->data[buf->size++] = 136;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -856,111 +865,6 @@ _eof_trans:
 }}
 	break;
 	case 32:
-#line 819 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 140;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 33:
-#line 838 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 163;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 34:
-#line 792 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 139;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 35:
-#line 648 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 191;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 36:
-#line 640 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 191;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 37:
-#line 773 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 38:
-#line 781 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 39:
-#line 724 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 132;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 40:
-#line 781 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 41:
 #line 830 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
@@ -970,89 +874,7 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 42:
-#line 629 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 190;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 43:
-#line 800 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 139;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 44:
-#line 838 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 163;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 45:
-#line 838 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 163;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 46:
-#line 811 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 140;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 47:
-#line 819 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 140;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 48:
-#line 781 "skt_translit_iast_nagari.rl"
-	{te = p+1;{
-   skt_buf_grow(buf, 6);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 145;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 49:
+	case 33:
 #line 724 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -1065,20 +887,73 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 50:
-#line 705 "skt_translit_iast_nagari.rl"
+	case 34:
+#line 678 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 129;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 35:
+#line 792 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 139;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 36:
+#line 773 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 136;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 37:
+#line 640 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 191;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 38:
+#line 724 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 130;
+   buf->data[buf->size++] = 132;
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 145;
    {cs = 48; goto _again;}
 }}
 	break;
-	case 51:
+	case 39:
+#line 819 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 140;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 40:
 #line 800 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -1091,7 +966,73 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 52:
+	case 41:
+#line 754 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 135;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 42:
+#line 667 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 128;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 43:
+#line 781 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 136;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 44:
+#line 773 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 136;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 45:
+#line 830 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 132;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 46:
+#line 773 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 136;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 47:
 #line 686 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 6);
@@ -1104,23 +1045,82 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 53:
-#line 830 "skt_translit_iast_nagari.rl"
+	case 48:
+#line 811 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 132;
+   buf->data[buf->size++] = 140;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 49:
+#line 838 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 163;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 50:
+#line 629 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 190;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 51:
+#line 811 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 140;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 52:
+#line 705 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 130;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 53:
+#line 819 "skt_translit_iast_nagari.rl"
+	{te = p+1;{
+   skt_buf_grow(buf, 6);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 140;
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 145;
    {cs = 48; goto _again;}
 }}
 	break;
 	case 54:
-#line 773 "skt_translit_iast_nagari.rl"
+#line 811 "skt_translit_iast_nagari.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 136;
+   buf->data[buf->size++] = 140;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -1136,42 +1136,42 @@ _eof_trans:
 }}
 	break;
 	case 56:
-#line 735 "skt_translit_iast_nagari.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 162;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 57:
-#line 830 "skt_translit_iast_nagari.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 132;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 58:
-#line 735 "skt_translit_iast_nagari.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 162;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 59:
 #line 716 "skt_translit_iast_nagari.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 131;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 57:
+#line 697 "skt_translit_iast_nagari.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 130;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 58:
+#line 659 "skt_translit_iast_nagari.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 128;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 59:
+#line 621 "skt_translit_iast_nagari.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 190;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -1186,32 +1186,32 @@ _eof_trans:
 }}
 	break;
 	case 61:
-#line 621 "skt_translit_iast_nagari.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 190;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 62:
-#line 716 "skt_translit_iast_nagari.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 131;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 63:
 #line 735 "skt_translit_iast_nagari.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 162;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 62:
+#line 659 "skt_translit_iast_nagari.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 128;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 63:
+#line 716 "skt_translit_iast_nagari.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 131;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -1226,26 +1226,16 @@ _eof_trans:
 }}
 	break;
 	case 65:
-#line 621 "skt_translit_iast_nagari.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 190;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 66:
-#line 697 "skt_translit_iast_nagari.rl"
+#line 735 "skt_translit_iast_nagari.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 130;
+   buf->data[buf->size++] = 162;
    {cs = 48; goto _again;}
 }}
 	break;
-	case 67:
+	case 66:
 #line 716 "skt_translit_iast_nagari.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
@@ -1255,7 +1245,27 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
+	case 67:
+#line 830 "skt_translit_iast_nagari.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 132;
+   {cs = 48; goto _again;}
+}}
+	break;
 	case 68:
+#line 735 "skt_translit_iast_nagari.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 162;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 69:
 #line 697 "skt_translit_iast_nagari.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
@@ -1265,23 +1275,13 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 69:
-#line 659 "skt_translit_iast_nagari.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 128;
-   {cs = 48; goto _again;}
-}}
-	break;
 	case 70:
-#line 659 "skt_translit_iast_nagari.rl"
+#line 621 "skt_translit_iast_nagari.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 128;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 190;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -1319,42 +1319,42 @@ _eof_trans:
 }}
 	break;
 	case 75:
-#line 735 "skt_translit_iast_nagari.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 162;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 76:
-#line 830 "skt_translit_iast_nagari.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 132;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 77:
-#line 735 "skt_translit_iast_nagari.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 162;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 78:
 #line 716 "skt_translit_iast_nagari.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 131;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 76:
+#line 697 "skt_translit_iast_nagari.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 130;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 77:
+#line 659 "skt_translit_iast_nagari.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 128;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 78:
+#line 621 "skt_translit_iast_nagari.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 190;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -1369,32 +1369,32 @@ _eof_trans:
 }}
 	break;
 	case 80:
-#line 621 "skt_translit_iast_nagari.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 190;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 81:
-#line 716 "skt_translit_iast_nagari.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 131;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 82:
 #line 735 "skt_translit_iast_nagari.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
    buf->data[buf->size++] = 162;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 81:
+#line 659 "skt_translit_iast_nagari.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 128;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 82:
+#line 716 "skt_translit_iast_nagari.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 131;
    {cs = 48; goto _again;}
 }}
 	break;
@@ -1409,26 +1409,16 @@ _eof_trans:
 }}
 	break;
 	case 84:
-#line 621 "skt_translit_iast_nagari.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 164;
-   buf->data[buf->size++] = 190;
-   {cs = 48; goto _again;}
-}}
-	break;
-	case 85:
-#line 697 "skt_translit_iast_nagari.rl"
+#line 735 "skt_translit_iast_nagari.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
    buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 130;
+   buf->data[buf->size++] = 162;
    {cs = 48; goto _again;}
 }}
 	break;
-	case 86:
+	case 85:
 #line 716 "skt_translit_iast_nagari.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
@@ -1438,7 +1428,27 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
+	case 86:
+#line 830 "skt_translit_iast_nagari.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 132;
+   {cs = 48; goto _again;}
+}}
+	break;
 	case 87:
+#line 735 "skt_translit_iast_nagari.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 3);
+   buf->data[buf->size++] = 224;
+   buf->data[buf->size++] = 165;
+   buf->data[buf->size++] = 162;
+   {cs = 48; goto _again;}
+}}
+	break;
+	case 88:
 #line 697 "skt_translit_iast_nagari.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
@@ -1448,23 +1458,13 @@ _eof_trans:
    {cs = 48; goto _again;}
 }}
 	break;
-	case 88:
-#line 659 "skt_translit_iast_nagari.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 3);
-   buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 128;
-   {cs = 48; goto _again;}
-}}
-	break;
 	case 89:
-#line 659 "skt_translit_iast_nagari.rl"
+#line 621 "skt_translit_iast_nagari.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 224;
-   buf->data[buf->size++] = 165;
-   buf->data[buf->size++] = 128;
+   buf->data[buf->size++] = 164;
+   buf->data[buf->size++] = 190;
    {cs = 48; goto _again;}
 }}
 	break;

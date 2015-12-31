@@ -1,7 +1,7 @@
 
 #line 1 "skt_sort.rl"
 
-#line 796 "skt_sort.rl"
+#line 801 "skt_sort.rl"
 
 
 void skt_sort_key(struct skt_buf *buf, const char *str, size_t len)
@@ -52,170 +52,185 @@ static const unsigned char _skt_sort_key_actions[] = {
 	131, 1, 132, 1, 133, 1, 134, 1, 
 	135, 1, 136, 1, 137, 1, 138, 1, 
 	139, 1, 140, 1, 141, 1, 142, 1, 
-	143
+	143, 1, 144, 1, 145, 1, 146
 };
 
 static const unsigned char _skt_sort_key_key_offsets[] = {
 	0, 1, 2, 3, 4, 5, 6, 7, 
-	8, 16, 30, 76, 80, 82, 84, 86, 
-	88, 90, 92, 93, 94, 96, 97, 98, 
-	100, 104, 106, 108, 110, 112, 114, 116, 
-	117, 118, 120, 121, 122, 124, 126, 130, 
-	134, 136, 138, 140, 142
+	8, 16, 30, 37, 38, 91, 92, 96, 
+	98, 100, 102, 104, 106, 108, 109, 110, 
+	112, 113, 114, 116, 120, 122, 124, 126, 
+	128, 130, 132, 133, 134, 136, 137, 138, 
+	140, 142, 144, 148, 152, 154, 156, 158, 
+	160, 162
 };
 
 static const unsigned char _skt_sort_key_trans_keys[] = {
 	165u, 132u, 165u, 132u, 165u, 132u, 165u, 132u, 
 	140u, 141u, 164u, 165u, 182u, 183u, 184u, 185u, 
 	130u, 131u, 132u, 133u, 134u, 135u, 154u, 155u, 
-	156u, 157u, 162u, 163u, 172u, 173u, 65u, 66u, 
-	67u, 68u, 69u, 71u, 72u, 73u, 74u, 75u, 
-	76u, 77u, 78u, 79u, 80u, 82u, 83u, 84u, 
-	85u, 86u, 89u, 97u, 98u, 99u, 100u, 101u, 
-	103u, 104u, 105u, 106u, 107u, 108u, 109u, 110u, 
-	111u, 112u, 114u, 115u, 116u, 117u, 118u, 121u, 
-	195u, 196u, 197u, 225u, 73u, 85u, 105u, 117u, 
+	156u, 157u, 162u, 163u, 172u, 173u, 175u, 128u, 
+	139u, 147u, 148u, 168u, 169u, 159u, 13u, 32u, 
+	45u, 65u, 66u, 67u, 68u, 69u, 71u, 72u, 
+	73u, 74u, 75u, 76u, 77u, 78u, 79u, 80u, 
+	82u, 83u, 84u, 85u, 86u, 89u, 97u, 98u, 
+	99u, 100u, 101u, 103u, 104u, 105u, 106u, 107u, 
+	108u, 109u, 110u, 111u, 112u, 114u, 115u, 116u, 
+	117u, 118u, 121u, 194u, 195u, 196u, 197u, 225u, 
+	226u, 9u, 12u, 10u, 73u, 85u, 105u, 117u, 
 	72u, 104u, 72u, 104u, 72u, 104u, 72u, 104u, 
 	72u, 104u, 72u, 104u, 204u, 204u, 72u, 104u, 
 	204u, 204u, 72u, 104u, 73u, 85u, 105u, 117u, 
 	72u, 104u, 72u, 104u, 72u, 104u, 72u, 104u, 
 	72u, 104u, 72u, 104u, 204u, 204u, 72u, 104u, 
-	204u, 204u, 72u, 104u, 145u, 177u, 128u, 129u, 
-	170u, 171u, 154u, 155u, 170u, 171u, 184u, 185u, 
-	72u, 104u, 72u, 104u, 72u, 104u, 72u, 104u, 
-	0
+	204u, 204u, 72u, 104u, 133u, 160u, 145u, 177u, 
+	128u, 129u, 170u, 171u, 154u, 155u, 170u, 171u, 
+	184u, 185u, 72u, 104u, 72u, 104u, 72u, 104u, 
+	72u, 104u, 128u, 129u, 0
 };
 
 static const char _skt_sort_key_single_lengths[] = {
 	1, 1, 1, 1, 1, 1, 1, 1, 
-	8, 14, 46, 4, 2, 2, 2, 2, 
+	8, 14, 1, 1, 51, 1, 4, 2, 
+	2, 2, 2, 2, 2, 1, 1, 2, 
+	1, 1, 2, 4, 2, 2, 2, 2, 
 	2, 2, 1, 1, 2, 1, 1, 2, 
-	4, 2, 2, 2, 2, 2, 2, 1, 
-	1, 2, 1, 1, 2, 2, 4, 4, 
-	2, 2, 2, 2, 2
+	2, 2, 4, 4, 2, 2, 2, 2, 
+	2, 2
 };
 
 static const char _skt_sort_key_range_lengths[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0, 3, 0, 1, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0
+	0, 0
 };
 
-static const unsigned char _skt_sort_key_index_offsets[] = {
+static const short _skt_sort_key_index_offsets[] = {
 	0, 2, 4, 6, 8, 10, 12, 14, 
-	16, 25, 40, 87, 92, 95, 98, 101, 
-	104, 107, 110, 112, 114, 117, 119, 121, 
-	124, 129, 132, 135, 138, 141, 144, 147, 
-	149, 151, 154, 156, 158, 161, 164, 169, 
-	174, 177, 180, 183, 186
+	16, 25, 40, 45, 47, 100, 102, 107, 
+	110, 113, 116, 119, 122, 125, 127, 129, 
+	132, 134, 136, 139, 144, 147, 150, 153, 
+	156, 159, 162, 164, 166, 169, 171, 173, 
+	176, 179, 182, 187, 192, 195, 198, 201, 
+	204, 207
 };
 
 static const char _skt_sort_key_trans_targs[] = {
-	19, 10, 10, 10, 22, 10, 10, 10, 
-	32, 10, 10, 10, 35, 10, 10, 10, 
-	41, 42, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 43, 44, 10, 
-	11, 12, 13, 14, 10, 15, 10, 10, 
-	16, 17, 18, 10, 10, 10, 20, 21, 
-	10, 23, 10, 10, 10, 24, 25, 26, 
-	27, 10, 28, 10, 10, 29, 30, 31, 
-	10, 10, 10, 33, 34, 10, 36, 10, 
-	10, 10, 37, 38, 39, 40, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 0, 10, 
-	1, 10, 10, 10, 10, 2, 10, 3, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 4, 10, 5, 10, 10, 
-	10, 10, 6, 10, 7, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 8, 9, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 10, 10, 10, 10, 10, 10, 10, 
-	10, 0
+	22, 12, 12, 12, 25, 12, 12, 12, 
+	35, 12, 12, 12, 38, 12, 12, 12, 
+	45, 46, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 47, 48, 12, 
+	12, 12, 12, 12, 12, 12, 12, 13, 
+	12, 12, 14, 15, 16, 17, 12, 18, 
+	12, 12, 19, 20, 21, 12, 12, 12, 
+	23, 24, 12, 26, 12, 12, 12, 27, 
+	28, 29, 30, 12, 31, 12, 12, 32, 
+	33, 34, 12, 12, 12, 36, 37, 12, 
+	39, 12, 12, 12, 40, 41, 42, 43, 
+	44, 49, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 0, 12, 1, 
+	12, 12, 12, 12, 2, 12, 3, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 4, 12, 5, 12, 12, 12, 
+	12, 6, 12, 7, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	8, 9, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 10, 
+	11, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 12, 12, 12, 12, 12, 
+	12, 12, 12, 0
 };
 
 static const short _skt_sort_key_trans_actions[] = {
-	5, 283, 47, 275, 5, 279, 31, 271, 
-	5, 285, 49, 277, 5, 281, 33, 273, 
+	5, 289, 47, 281, 5, 285, 31, 277, 
+	5, 291, 49, 283, 5, 287, 33, 279, 
 	0, 0, 79, 81, 39, 41, 43, 45, 
-	287, 75, 77, 99, 101, 139, 141, 27, 
-	29, 35, 37, 195, 197, 0, 0, 287, 
-	0, 0, 0, 0, 51, 0, 203, 11, 
-	0, 0, 5, 179, 159, 63, 0, 5, 
-	199, 0, 19, 187, 183, 0, 0, 0, 
-	0, 53, 0, 205, 13, 0, 0, 5, 
-	181, 161, 65, 0, 5, 201, 0, 21, 
-	189, 185, 0, 0, 0, 5, 207, 55, 
-	67, 57, 69, 209, 171, 173, 257, 103, 
-	105, 229, 151, 153, 249, 91, 93, 225, 
-	111, 113, 233, 83, 85, 221, 0, 265, 
-	0, 217, 163, 165, 253, 0, 261, 0, 
-	213, 143, 145, 245, 59, 71, 61, 73, 
-	211, 175, 177, 259, 107, 109, 231, 155, 
-	157, 251, 95, 97, 227, 115, 117, 235, 
-	87, 89, 223, 0, 267, 0, 219, 167, 
-	169, 255, 0, 263, 0, 215, 147, 149, 
-	247, 119, 121, 269, 7, 9, 15, 17, 
-	269, 191, 193, 23, 25, 269, 0, 0, 
-	269, 131, 133, 241, 135, 137, 243, 123, 
-	125, 237, 127, 129, 239, 283, 275, 279, 
-	271, 285, 277, 281, 273, 287, 287, 209, 
-	257, 229, 249, 225, 233, 221, 265, 217, 
-	253, 261, 213, 245, 211, 259, 231, 251, 
-	227, 235, 223, 267, 219, 255, 263, 215, 
-	247, 269, 269, 269, 269, 241, 243, 237, 
-	239, 0
+	293, 75, 77, 99, 101, 139, 141, 27, 
+	29, 35, 37, 195, 197, 0, 0, 293, 
+	209, 209, 207, 209, 293, 209, 293, 0, 
+	209, 207, 0, 0, 0, 0, 51, 0, 
+	203, 11, 0, 0, 5, 179, 159, 63, 
+	0, 5, 199, 0, 19, 187, 183, 0, 
+	0, 0, 0, 53, 0, 205, 13, 0, 
+	0, 5, 181, 161, 65, 0, 5, 201, 
+	0, 21, 189, 185, 0, 0, 0, 0, 
+	5, 5, 209, 211, 209, 273, 55, 67, 
+	57, 69, 213, 171, 173, 261, 103, 105, 
+	233, 151, 153, 253, 91, 93, 229, 111, 
+	113, 237, 83, 85, 225, 0, 269, 0, 
+	221, 163, 165, 257, 0, 265, 0, 217, 
+	143, 145, 249, 59, 71, 61, 73, 215, 
+	175, 177, 263, 107, 109, 235, 155, 157, 
+	255, 95, 97, 231, 115, 117, 239, 87, 
+	89, 227, 0, 271, 0, 223, 167, 169, 
+	259, 0, 267, 0, 219, 147, 149, 251, 
+	209, 209, 275, 119, 121, 275, 7, 9, 
+	15, 17, 275, 191, 193, 23, 25, 275, 
+	0, 0, 275, 131, 133, 245, 135, 137, 
+	247, 123, 125, 241, 127, 129, 243, 0, 
+	0, 275, 289, 281, 285, 277, 291, 283, 
+	287, 279, 293, 293, 293, 293, 273, 213, 
+	261, 233, 253, 229, 237, 225, 269, 221, 
+	257, 265, 217, 249, 215, 263, 235, 255, 
+	231, 239, 227, 271, 223, 259, 267, 219, 
+	251, 275, 275, 275, 275, 275, 245, 247, 
+	241, 243, 275, 0
 };
 
 static const short _skt_sort_key_to_state_actions[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 1, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 1, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0
 };
 
 static const short _skt_sort_key_from_state_actions[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 3, 0, 0, 0, 0, 0, 
+	0, 0, 0, 0, 3, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
 	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0
+	0, 0, 0, 0, 0, 0, 0, 0, 
+	0, 0
 };
 
-static const unsigned char _skt_sort_key_eof_trans[] = {
-	190, 191, 192, 193, 194, 195, 196, 197, 
-	199, 199, 0, 200, 201, 202, 203, 204, 
-	205, 206, 207, 208, 209, 210, 211, 212, 
-	213, 214, 215, 216, 217, 218, 219, 220, 
-	221, 222, 223, 224, 225, 229, 229, 229, 
-	229, 230, 231, 232, 233
+static const short _skt_sort_key_eof_trans[] = {
+	211, 212, 213, 214, 215, 216, 217, 218, 
+	222, 222, 222, 222, 0, 223, 224, 225, 
+	226, 227, 228, 229, 230, 231, 232, 233, 
+	234, 235, 236, 237, 238, 239, 240, 241, 
+	242, 243, 244, 245, 246, 247, 248, 249, 
+	259, 259, 259, 259, 259, 255, 256, 257, 
+	258, 259
 };
 
-static const int skt_sort_key_start = 10;
-static const int skt_sort_key_first_final = 10;
+static const int skt_sort_key_start = 12;
+static const int skt_sort_key_first_final = 12;
 static const int skt_sort_key_error = -1;
 
-static const int skt_sort_key_en_main = 10;
+static const int skt_sort_key_en_main = 12;
 
 
-#line 808 "skt_sort.rl"
+#line 813 "skt_sort.rl"
    
-#line 219 "skt_sort.ic"
+#line 234 "skt_sort.ic"
 	{
 	cs = skt_sort_key_start;
 	ts = 0;
@@ -223,9 +238,9 @@ static const int skt_sort_key_en_main = 10;
 	act = 0;
 	}
 
-#line 809 "skt_sort.rl"
+#line 814 "skt_sort.rl"
    
-#line 229 "skt_sort.ic"
+#line 244 "skt_sort.ic"
 	{
 	int _klen;
 	unsigned int _trans;
@@ -244,7 +259,7 @@ _resume:
 #line 1 "NONE"
 	{ts = p;}
 	break;
-#line 248 "skt_sort.ic"
+#line 263 "skt_sort.ic"
 		}
 	}
 
@@ -314,7 +329,7 @@ _eof_trans:
 	{te = p+1;}
 	break;
 	case 3:
-#line 17 "skt_sort.rl"
+#line 20 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 2;
@@ -322,7 +337,7 @@ _eof_trans:
 }}
 	break;
 	case 4:
-#line 22 "skt_sort.rl"
+#line 25 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 2;
@@ -330,7 +345,7 @@ _eof_trans:
 }}
 	break;
 	case 5:
-#line 27 "skt_sort.rl"
+#line 30 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 3;
@@ -338,7 +353,7 @@ _eof_trans:
 }}
 	break;
 	case 6:
-#line 32 "skt_sort.rl"
+#line 35 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 3;
@@ -346,7 +361,7 @@ _eof_trans:
 }}
 	break;
 	case 7:
-#line 37 "skt_sort.rl"
+#line 40 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 4;
@@ -354,7 +369,7 @@ _eof_trans:
 }}
 	break;
 	case 8:
-#line 42 "skt_sort.rl"
+#line 45 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 4;
@@ -362,7 +377,7 @@ _eof_trans:
 }}
 	break;
 	case 9:
-#line 47 "skt_sort.rl"
+#line 50 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 5;
@@ -370,7 +385,7 @@ _eof_trans:
 }}
 	break;
 	case 10:
-#line 52 "skt_sort.rl"
+#line 55 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 5;
@@ -378,7 +393,7 @@ _eof_trans:
 }}
 	break;
 	case 11:
-#line 57 "skt_sort.rl"
+#line 60 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 6;
@@ -386,7 +401,7 @@ _eof_trans:
 }}
 	break;
 	case 12:
-#line 62 "skt_sort.rl"
+#line 65 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 6;
@@ -394,7 +409,7 @@ _eof_trans:
 }}
 	break;
 	case 13:
-#line 77 "skt_sort.rl"
+#line 80 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 8;
@@ -402,7 +417,7 @@ _eof_trans:
 }}
 	break;
 	case 14:
-#line 82 "skt_sort.rl"
+#line 85 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 8;
@@ -410,7 +425,7 @@ _eof_trans:
 }}
 	break;
 	case 15:
-#line 87 "skt_sort.rl"
+#line 90 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 9;
@@ -418,7 +433,7 @@ _eof_trans:
 }}
 	break;
 	case 16:
-#line 92 "skt_sort.rl"
+#line 95 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 9;
@@ -426,7 +441,7 @@ _eof_trans:
 }}
 	break;
 	case 17:
-#line 97 "skt_sort.rl"
+#line 100 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 10;
@@ -434,7 +449,7 @@ _eof_trans:
 }}
 	break;
 	case 18:
-#line 102 "skt_sort.rl"
+#line 105 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 10;
@@ -442,7 +457,7 @@ _eof_trans:
 }}
 	break;
 	case 19:
-#line 117 "skt_sort.rl"
+#line 120 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 12;
@@ -450,7 +465,7 @@ _eof_trans:
 }}
 	break;
 	case 20:
-#line 122 "skt_sort.rl"
+#line 125 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 12;
@@ -458,7 +473,7 @@ _eof_trans:
 }}
 	break;
 	case 21:
-#line 127 "skt_sort.rl"
+#line 130 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 13;
@@ -466,7 +481,7 @@ _eof_trans:
 }}
 	break;
 	case 22:
-#line 132 "skt_sort.rl"
+#line 135 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 13;
@@ -474,7 +489,7 @@ _eof_trans:
 }}
 	break;
 	case 23:
-#line 137 "skt_sort.rl"
+#line 140 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 14;
@@ -482,7 +497,7 @@ _eof_trans:
 }}
 	break;
 	case 24:
-#line 142 "skt_sort.rl"
+#line 145 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 14;
@@ -490,7 +505,7 @@ _eof_trans:
 }}
 	break;
 	case 25:
-#line 147 "skt_sort.rl"
+#line 150 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 15;
@@ -498,7 +513,7 @@ _eof_trans:
 }}
 	break;
 	case 26:
-#line 152 "skt_sort.rl"
+#line 155 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 15;
@@ -506,7 +521,7 @@ _eof_trans:
 }}
 	break;
 	case 27:
-#line 157 "skt_sort.rl"
+#line 160 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 16;
@@ -514,7 +529,7 @@ _eof_trans:
 }}
 	break;
 	case 28:
-#line 162 "skt_sort.rl"
+#line 165 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 16;
@@ -522,7 +537,7 @@ _eof_trans:
 }}
 	break;
 	case 29:
-#line 167 "skt_sort.rl"
+#line 170 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 16;
@@ -530,7 +545,7 @@ _eof_trans:
 }}
 	break;
 	case 30:
-#line 172 "skt_sort.rl"
+#line 175 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 16;
@@ -538,7 +553,7 @@ _eof_trans:
 }}
 	break;
 	case 31:
-#line 177 "skt_sort.rl"
+#line 180 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 17;
@@ -546,7 +561,7 @@ _eof_trans:
 }}
 	break;
 	case 32:
-#line 182 "skt_sort.rl"
+#line 185 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 17;
@@ -554,7 +569,7 @@ _eof_trans:
 }}
 	break;
 	case 33:
-#line 187 "skt_sort.rl"
+#line 190 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 18;
@@ -562,7 +577,7 @@ _eof_trans:
 }}
 	break;
 	case 34:
-#line 192 "skt_sort.rl"
+#line 195 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 18;
@@ -570,7 +585,7 @@ _eof_trans:
 }}
 	break;
 	case 35:
-#line 197 "skt_sort.rl"
+#line 200 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 18;
@@ -578,7 +593,7 @@ _eof_trans:
 }}
 	break;
 	case 36:
-#line 202 "skt_sort.rl"
+#line 205 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 18;
@@ -586,7 +601,7 @@ _eof_trans:
 }}
 	break;
 	case 37:
-#line 207 "skt_sort.rl"
+#line 210 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 19;
@@ -594,7 +609,7 @@ _eof_trans:
 }}
 	break;
 	case 38:
-#line 212 "skt_sort.rl"
+#line 215 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 19;
@@ -602,7 +617,7 @@ _eof_trans:
 }}
 	break;
 	case 39:
-#line 217 "skt_sort.rl"
+#line 220 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 20;
@@ -610,7 +625,7 @@ _eof_trans:
 }}
 	break;
 	case 40:
-#line 222 "skt_sort.rl"
+#line 225 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 20;
@@ -618,7 +633,7 @@ _eof_trans:
 }}
 	break;
 	case 41:
-#line 237 "skt_sort.rl"
+#line 240 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 22;
@@ -626,7 +641,7 @@ _eof_trans:
 }}
 	break;
 	case 42:
-#line 242 "skt_sort.rl"
+#line 245 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 22;
@@ -634,7 +649,7 @@ _eof_trans:
 }}
 	break;
 	case 43:
-#line 247 "skt_sort.rl"
+#line 250 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 22;
@@ -642,7 +657,7 @@ _eof_trans:
 }}
 	break;
 	case 44:
-#line 252 "skt_sort.rl"
+#line 255 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 22;
@@ -650,7 +665,7 @@ _eof_trans:
 }}
 	break;
 	case 45:
-#line 267 "skt_sort.rl"
+#line 270 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 24;
@@ -658,7 +673,7 @@ _eof_trans:
 }}
 	break;
 	case 46:
-#line 272 "skt_sort.rl"
+#line 275 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 24;
@@ -666,7 +681,7 @@ _eof_trans:
 }}
 	break;
 	case 47:
-#line 277 "skt_sort.rl"
+#line 280 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 24;
@@ -674,7 +689,7 @@ _eof_trans:
 }}
 	break;
 	case 48:
-#line 282 "skt_sort.rl"
+#line 285 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 24;
@@ -682,7 +697,7 @@ _eof_trans:
 }}
 	break;
 	case 49:
-#line 287 "skt_sort.rl"
+#line 290 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 25;
@@ -690,7 +705,7 @@ _eof_trans:
 }}
 	break;
 	case 50:
-#line 292 "skt_sort.rl"
+#line 295 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 25;
@@ -698,7 +713,7 @@ _eof_trans:
 }}
 	break;
 	case 51:
-#line 307 "skt_sort.rl"
+#line 310 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 27;
@@ -706,7 +721,7 @@ _eof_trans:
 }}
 	break;
 	case 52:
-#line 312 "skt_sort.rl"
+#line 315 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 27;
@@ -714,7 +729,7 @@ _eof_trans:
 }}
 	break;
 	case 53:
-#line 317 "skt_sort.rl"
+#line 320 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 27;
@@ -722,7 +737,7 @@ _eof_trans:
 }}
 	break;
 	case 54:
-#line 322 "skt_sort.rl"
+#line 325 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 27;
@@ -730,7 +745,7 @@ _eof_trans:
 }}
 	break;
 	case 55:
-#line 337 "skt_sort.rl"
+#line 340 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 29;
@@ -738,7 +753,7 @@ _eof_trans:
 }}
 	break;
 	case 56:
-#line 342 "skt_sort.rl"
+#line 345 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 29;
@@ -746,7 +761,7 @@ _eof_trans:
 }}
 	break;
 	case 57:
-#line 347 "skt_sort.rl"
+#line 350 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 29;
@@ -754,7 +769,7 @@ _eof_trans:
 }}
 	break;
 	case 58:
-#line 352 "skt_sort.rl"
+#line 355 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 29;
@@ -762,7 +777,7 @@ _eof_trans:
 }}
 	break;
 	case 59:
-#line 357 "skt_sort.rl"
+#line 360 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 30;
@@ -770,7 +785,7 @@ _eof_trans:
 }}
 	break;
 	case 60:
-#line 362 "skt_sort.rl"
+#line 365 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 30;
@@ -778,7 +793,7 @@ _eof_trans:
 }}
 	break;
 	case 61:
-#line 377 "skt_sort.rl"
+#line 380 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 32;
@@ -786,7 +801,7 @@ _eof_trans:
 }}
 	break;
 	case 62:
-#line 382 "skt_sort.rl"
+#line 385 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 32;
@@ -794,7 +809,7 @@ _eof_trans:
 }}
 	break;
 	case 63:
-#line 387 "skt_sort.rl"
+#line 390 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 32;
@@ -802,7 +817,7 @@ _eof_trans:
 }}
 	break;
 	case 64:
-#line 392 "skt_sort.rl"
+#line 395 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 32;
@@ -810,7 +825,7 @@ _eof_trans:
 }}
 	break;
 	case 65:
-#line 407 "skt_sort.rl"
+#line 410 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 34;
@@ -818,7 +833,7 @@ _eof_trans:
 }}
 	break;
 	case 66:
-#line 412 "skt_sort.rl"
+#line 415 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 34;
@@ -826,7 +841,7 @@ _eof_trans:
 }}
 	break;
 	case 67:
-#line 417 "skt_sort.rl"
+#line 420 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 34;
@@ -834,7 +849,7 @@ _eof_trans:
 }}
 	break;
 	case 68:
-#line 422 "skt_sort.rl"
+#line 425 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 34;
@@ -842,7 +857,7 @@ _eof_trans:
 }}
 	break;
 	case 69:
-#line 427 "skt_sort.rl"
+#line 430 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 35;
@@ -850,7 +865,7 @@ _eof_trans:
 }}
 	break;
 	case 70:
-#line 432 "skt_sort.rl"
+#line 435 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 35;
@@ -858,7 +873,7 @@ _eof_trans:
 }}
 	break;
 	case 71:
-#line 447 "skt_sort.rl"
+#line 450 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 37;
@@ -866,7 +881,7 @@ _eof_trans:
 }}
 	break;
 	case 72:
-#line 452 "skt_sort.rl"
+#line 455 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 37;
@@ -874,7 +889,7 @@ _eof_trans:
 }}
 	break;
 	case 73:
-#line 457 "skt_sort.rl"
+#line 460 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 37;
@@ -882,7 +897,7 @@ _eof_trans:
 }}
 	break;
 	case 74:
-#line 462 "skt_sort.rl"
+#line 465 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 37;
@@ -890,7 +905,7 @@ _eof_trans:
 }}
 	break;
 	case 75:
-#line 477 "skt_sort.rl"
+#line 480 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 39;
@@ -898,7 +913,7 @@ _eof_trans:
 }}
 	break;
 	case 76:
-#line 482 "skt_sort.rl"
+#line 485 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 39;
@@ -906,7 +921,7 @@ _eof_trans:
 }}
 	break;
 	case 77:
-#line 487 "skt_sort.rl"
+#line 490 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 39;
@@ -914,7 +929,7 @@ _eof_trans:
 }}
 	break;
 	case 78:
-#line 492 "skt_sort.rl"
+#line 495 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 39;
@@ -922,7 +937,7 @@ _eof_trans:
 }}
 	break;
 	case 79:
-#line 497 "skt_sort.rl"
+#line 500 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 40;
@@ -930,7 +945,7 @@ _eof_trans:
 }}
 	break;
 	case 80:
-#line 502 "skt_sort.rl"
+#line 505 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 40;
@@ -938,7 +953,7 @@ _eof_trans:
 }}
 	break;
 	case 81:
-#line 517 "skt_sort.rl"
+#line 520 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 42;
@@ -946,7 +961,7 @@ _eof_trans:
 }}
 	break;
 	case 82:
-#line 522 "skt_sort.rl"
+#line 525 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 42;
@@ -954,7 +969,7 @@ _eof_trans:
 }}
 	break;
 	case 83:
-#line 527 "skt_sort.rl"
+#line 530 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 42;
@@ -962,7 +977,7 @@ _eof_trans:
 }}
 	break;
 	case 84:
-#line 532 "skt_sort.rl"
+#line 535 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 42;
@@ -970,7 +985,7 @@ _eof_trans:
 }}
 	break;
 	case 85:
-#line 547 "skt_sort.rl"
+#line 550 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 44;
@@ -978,7 +993,7 @@ _eof_trans:
 }}
 	break;
 	case 86:
-#line 552 "skt_sort.rl"
+#line 555 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 44;
@@ -986,7 +1001,7 @@ _eof_trans:
 }}
 	break;
 	case 87:
-#line 557 "skt_sort.rl"
+#line 560 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 44;
@@ -994,7 +1009,7 @@ _eof_trans:
 }}
 	break;
 	case 88:
-#line 562 "skt_sort.rl"
+#line 565 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 44;
@@ -1002,7 +1017,7 @@ _eof_trans:
 }}
 	break;
 	case 89:
-#line 567 "skt_sort.rl"
+#line 570 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 45;
@@ -1010,7 +1025,7 @@ _eof_trans:
 }}
 	break;
 	case 90:
-#line 572 "skt_sort.rl"
+#line 575 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 45;
@@ -1018,7 +1033,7 @@ _eof_trans:
 }}
 	break;
 	case 91:
-#line 577 "skt_sort.rl"
+#line 580 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -1026,7 +1041,7 @@ _eof_trans:
 }}
 	break;
 	case 92:
-#line 582 "skt_sort.rl"
+#line 585 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 46;
@@ -1034,7 +1049,7 @@ _eof_trans:
 }}
 	break;
 	case 93:
-#line 607 "skt_sort.rl"
+#line 610 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 49;
@@ -1042,7 +1057,7 @@ _eof_trans:
 }}
 	break;
 	case 94:
-#line 612 "skt_sort.rl"
+#line 615 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 49;
@@ -1050,7 +1065,7 @@ _eof_trans:
 }}
 	break;
 	case 95:
-#line 617 "skt_sort.rl"
+#line 620 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 50;
@@ -1058,7 +1073,7 @@ _eof_trans:
 }}
 	break;
 	case 96:
-#line 622 "skt_sort.rl"
+#line 625 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 50;
@@ -1066,7 +1081,7 @@ _eof_trans:
 }}
 	break;
 	case 97:
-#line 627 "skt_sort.rl"
+#line 630 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 51;
@@ -1074,7 +1089,7 @@ _eof_trans:
 }}
 	break;
 	case 98:
-#line 632 "skt_sort.rl"
+#line 635 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 51;
@@ -1082,7 +1097,7 @@ _eof_trans:
 }}
 	break;
 	case 99:
-#line 637 "skt_sort.rl"
+#line 640 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 52;
@@ -1090,7 +1105,7 @@ _eof_trans:
 }}
 	break;
 	case 100:
-#line 642 "skt_sort.rl"
+#line 645 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 52;
@@ -1098,7 +1113,7 @@ _eof_trans:
 }}
 	break;
 	case 101:
-#line 647 "skt_sort.rl"
+#line 650 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 53;
@@ -1106,7 +1121,7 @@ _eof_trans:
 }}
 	break;
 	case 102:
-#line 652 "skt_sort.rl"
+#line 655 "skt_sort.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 53;
@@ -1114,334 +1129,346 @@ _eof_trans:
 }}
 	break;
 	case 103:
-#line 789 "skt_sort.rl"
+#line 792 "skt_sort.rl"
+	{te = p+1;}
+	break;
+	case 104:
+#line 793 "skt_sort.rl"
+	{te = p+1;}
+	break;
+	case 105:
+#line 794 "skt_sort.rl"
 	{te = p+1;{
       skt_buf_grow(buf, 2);
       buf->data[buf->size++] = 0xff;
       buf->data[buf->size++] = *p;
    }}
 	break;
-	case 104:
-#line 7 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 1;
-   buf->data[buf->size++] = 1;
-}}
-	break;
-	case 105:
-#line 12 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 1;
-   buf->data[buf->size++] = 2;
-}}
-	break;
 	case 106:
-#line 67 "skt_sort.rl"
+#line 10 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 7;
+   buf->data[buf->size++] = 1;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 107:
-#line 72 "skt_sort.rl"
+#line 15 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 7;
+   buf->data[buf->size++] = 1;
    buf->data[buf->size++] = 2;
 }}
 	break;
 	case 108:
-#line 107 "skt_sort.rl"
+#line 70 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 11;
+   buf->data[buf->size++] = 7;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 109:
-#line 112 "skt_sort.rl"
+#line 75 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 11;
+   buf->data[buf->size++] = 7;
    buf->data[buf->size++] = 2;
 }}
 	break;
 	case 110:
-#line 227 "skt_sort.rl"
+#line 110 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 21;
+   buf->data[buf->size++] = 11;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 111:
-#line 232 "skt_sort.rl"
+#line 115 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 11;
+   buf->data[buf->size++] = 2;
+}}
+	break;
+	case 112:
+#line 230 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 21;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 113:
+#line 235 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 21;
    buf->data[buf->size++] = 2;
 }}
 	break;
-	case 112:
-#line 257 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 23;
-   buf->data[buf->size++] = 1;
-}}
-	break;
-	case 113:
-#line 262 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 23;
-   buf->data[buf->size++] = 2;
-}}
-	break;
 	case 114:
-#line 297 "skt_sort.rl"
+#line 260 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 26;
+   buf->data[buf->size++] = 23;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 115:
-#line 302 "skt_sort.rl"
+#line 265 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 23;
+   buf->data[buf->size++] = 2;
+}}
+	break;
+	case 116:
+#line 300 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 26;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 117:
+#line 305 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 26;
    buf->data[buf->size++] = 2;
 }}
 	break;
-	case 116:
-#line 327 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 28;
-   buf->data[buf->size++] = 1;
-}}
-	break;
-	case 117:
-#line 332 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 28;
-   buf->data[buf->size++] = 2;
-}}
-	break;
 	case 118:
-#line 367 "skt_sort.rl"
+#line 330 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 31;
+   buf->data[buf->size++] = 28;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 119:
-#line 372 "skt_sort.rl"
+#line 335 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 28;
+   buf->data[buf->size++] = 2;
+}}
+	break;
+	case 120:
+#line 370 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 31;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 121:
+#line 375 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 31;
    buf->data[buf->size++] = 2;
 }}
 	break;
-	case 120:
-#line 397 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 33;
-   buf->data[buf->size++] = 1;
-}}
-	break;
-	case 121:
-#line 402 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 33;
-   buf->data[buf->size++] = 2;
-}}
-	break;
 	case 122:
-#line 437 "skt_sort.rl"
+#line 400 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 36;
+   buf->data[buf->size++] = 33;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 123:
-#line 442 "skt_sort.rl"
+#line 405 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 33;
+   buf->data[buf->size++] = 2;
+}}
+	break;
+	case 124:
+#line 440 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 36;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 125:
+#line 445 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 36;
    buf->data[buf->size++] = 2;
 }}
 	break;
-	case 124:
-#line 467 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 38;
-   buf->data[buf->size++] = 1;
-}}
-	break;
-	case 125:
-#line 472 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 38;
-   buf->data[buf->size++] = 2;
-}}
-	break;
 	case 126:
-#line 507 "skt_sort.rl"
+#line 470 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 41;
+   buf->data[buf->size++] = 38;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 127:
-#line 512 "skt_sort.rl"
+#line 475 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 38;
+   buf->data[buf->size++] = 2;
+}}
+	break;
+	case 128:
+#line 510 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 41;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 129:
+#line 515 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 41;
    buf->data[buf->size++] = 2;
 }}
 	break;
-	case 128:
-#line 537 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 43;
-   buf->data[buf->size++] = 1;
-}}
-	break;
-	case 129:
-#line 542 "skt_sort.rl"
-	{te = p;p--;{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 43;
-   buf->data[buf->size++] = 2;
-}}
-	break;
 	case 130:
-#line 587 "skt_sort.rl"
+#line 540 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 47;
+   buf->data[buf->size++] = 43;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 131:
-#line 592 "skt_sort.rl"
+#line 545 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 47;
+   buf->data[buf->size++] = 43;
    buf->data[buf->size++] = 2;
 }}
 	break;
 	case 132:
-#line 597 "skt_sort.rl"
+#line 590 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 48;
+   buf->data[buf->size++] = 47;
    buf->data[buf->size++] = 1;
 }}
 	break;
 	case 133:
-#line 602 "skt_sort.rl"
+#line 595 "skt_sort.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 48;
+   buf->data[buf->size++] = 47;
    buf->data[buf->size++] = 2;
 }}
 	break;
 	case 134:
-#line 789 "skt_sort.rl"
+#line 600 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 48;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 135:
+#line 605 "skt_sort.rl"
+	{te = p;p--;{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 48;
+   buf->data[buf->size++] = 2;
+}}
+	break;
+	case 136:
+#line 793 "skt_sort.rl"
+	{te = p;p--;}
+	break;
+	case 137:
+#line 794 "skt_sort.rl"
 	{te = p;p--;{
       skt_buf_grow(buf, 2);
       buf->data[buf->size++] = 0xff;
       buf->data[buf->size++] = *p;
    }}
 	break;
-	case 135:
-#line 67 "skt_sort.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 7;
-   buf->data[buf->size++] = 1;
-}}
-	break;
-	case 136:
-#line 72 "skt_sort.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 7;
-   buf->data[buf->size++] = 2;
-}}
-	break;
-	case 137:
-#line 107 "skt_sort.rl"
-	{{p = ((te))-1;}{
-   skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 11;
-   buf->data[buf->size++] = 1;
-}}
-	break;
 	case 138:
-#line 112 "skt_sort.rl"
+#line 70 "skt_sort.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 11;
-   buf->data[buf->size++] = 2;
+   buf->data[buf->size++] = 7;
+   buf->data[buf->size++] = 1;
 }}
 	break;
 	case 139:
-#line 587 "skt_sort.rl"
+#line 75 "skt_sort.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 2);
-   buf->data[buf->size++] = 47;
-   buf->data[buf->size++] = 1;
+   buf->data[buf->size++] = 7;
+   buf->data[buf->size++] = 2;
 }}
 	break;
 	case 140:
-#line 592 "skt_sort.rl"
+#line 110 "skt_sort.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 11;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 141:
+#line 115 "skt_sort.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 11;
+   buf->data[buf->size++] = 2;
+}}
+	break;
+	case 142:
+#line 590 "skt_sort.rl"
+	{{p = ((te))-1;}{
+   skt_buf_grow(buf, 2);
+   buf->data[buf->size++] = 47;
+   buf->data[buf->size++] = 1;
+}}
+	break;
+	case 143:
+#line 595 "skt_sort.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 47;
    buf->data[buf->size++] = 2;
 }}
 	break;
-	case 141:
-#line 597 "skt_sort.rl"
+	case 144:
+#line 600 "skt_sort.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 48;
    buf->data[buf->size++] = 1;
 }}
 	break;
-	case 142:
-#line 602 "skt_sort.rl"
+	case 145:
+#line 605 "skt_sort.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 48;
    buf->data[buf->size++] = 2;
 }}
 	break;
-	case 143:
-#line 789 "skt_sort.rl"
+	case 146:
+#line 794 "skt_sort.rl"
 	{{p = ((te))-1;}{
       skt_buf_grow(buf, 2);
       buf->data[buf->size++] = 0xff;
       buf->data[buf->size++] = *p;
    }}
 	break;
-#line 1445 "skt_sort.ic"
+#line 1472 "skt_sort.ic"
 		}
 	}
 
@@ -1454,7 +1481,7 @@ _again:
 #line 1 "NONE"
 	{ts = 0;}
 	break;
-#line 1458 "skt_sort.ic"
+#line 1485 "skt_sort.ic"
 		}
 	}
 
@@ -1471,6 +1498,6 @@ _again:
 
 	}
 
-#line 810 "skt_sort.rl"
+#line 815 "skt_sort.rl"
    skt_buf_truncate(buf, buf->size);
 }

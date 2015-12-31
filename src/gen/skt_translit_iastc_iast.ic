@@ -200,7 +200,7 @@ _eof_trans:
 	{te = p+1;}
 	break;
 	case 3:
-#line 43 "skt_translit_iastc_iast.rl"
+#line 36 "skt_translit_iastc_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -209,7 +209,7 @@ _eof_trans:
 }}
 	break;
 	case 4:
-#line 8 "skt_translit_iastc_iast.rl"
+#line 57 "skt_translit_iastc_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -218,7 +218,7 @@ _eof_trans:
 }}
 	break;
 	case 5:
-#line 36 "skt_translit_iastc_iast.rl"
+#line 29 "skt_translit_iastc_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -227,7 +227,7 @@ _eof_trans:
 }}
 	break;
 	case 6:
-#line 22 "skt_translit_iastc_iast.rl"
+#line 8 "skt_translit_iastc_iast.rl"
 	{te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -243,7 +243,7 @@ _eof_trans:
    }}
 	break;
 	case 8:
-#line 29 "skt_translit_iastc_iast.rl"
+#line 50 "skt_translit_iastc_iast.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -252,7 +252,7 @@ _eof_trans:
 }}
 	break;
 	case 9:
-#line 15 "skt_translit_iastc_iast.rl"
+#line 43 "skt_translit_iastc_iast.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -261,7 +261,7 @@ _eof_trans:
 }}
 	break;
 	case 10:
-#line 57 "skt_translit_iastc_iast.rl"
+#line 22 "skt_translit_iastc_iast.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -270,7 +270,7 @@ _eof_trans:
 }}
 	break;
 	case 11:
-#line 50 "skt_translit_iastc_iast.rl"
+#line 15 "skt_translit_iastc_iast.rl"
 	{te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -286,7 +286,7 @@ _eof_trans:
    }}
 	break;
 	case 13:
-#line 29 "skt_translit_iastc_iast.rl"
+#line 50 "skt_translit_iastc_iast.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -295,7 +295,7 @@ _eof_trans:
 }}
 	break;
 	case 14:
-#line 15 "skt_translit_iastc_iast.rl"
+#line 43 "skt_translit_iastc_iast.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -304,7 +304,7 @@ _eof_trans:
 }}
 	break;
 	case 15:
-#line 57 "skt_translit_iastc_iast.rl"
+#line 22 "skt_translit_iastc_iast.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
@@ -313,7 +313,7 @@ _eof_trans:
 }}
 	break;
 	case 16:
-#line 50 "skt_translit_iastc_iast.rl"
+#line 15 "skt_translit_iastc_iast.rl"
 	{{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;

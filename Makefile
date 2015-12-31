@@ -7,6 +7,8 @@ CFLAGS += -flto -fdata-sections -ffunction-sections -Wl,--gc-sections
 AMALG = skt.h skt.c
 BINARIES = skt_sort skt_translit
 
+SOURCES = $(wildcard src/*.c) $(wildcard src/*.c) $(wildcard src/gen/*.ic)
+
 #--------------------------------------
 # Abstract targets
 #--------------------------------------
@@ -37,8 +39,8 @@ uninstall:
 # Concrete targets
 #--------------------------------------
 
-skt.c: src/skt.c src/buf.c src/mem.c
-	scripts/mkamalg.py $^ > $@
+skt.c: $(SOURCES)
+	scripts/mkamalg.py src/*.c > $@
 
 skt.h: src/skt.h
 	cp $< $@

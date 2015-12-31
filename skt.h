@@ -48,6 +48,11 @@ void skt_buf_fini(struct skt_buf *buf);
  * Main functions.
  *****************************************************************************/
 
+/* Creates a sort key for a IAST-encoded string.
+ * If the provided string doesn't contain nul bytes, the created key won't, too.
+ */
+void skt_sort_key(struct skt_buf *buf, const char *str, size_t len);
+
 /* A function that transliterates a string.
  * Unknown characters are left unchanged. Sequences of characters known the
  * transliteration function are replaced with NFC-normalized sequences, which
@@ -60,10 +65,5 @@ typedef void (*skt_translit)(struct skt_buf *, const char *str, size_t len);
  */
 skt_translit skt_translit_func(const char *input_scheme,
                                const char *output_scheme);
-
-/* Creates a sort key for a IAST-encoded string.
- * If the provided string doesn't contain nul bytes, the created key won't, too.
- */
-void skt_sort_key(struct skt_buf *buf, const char *str, size_t len);
 
 #endif

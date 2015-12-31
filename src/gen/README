@@ -1,1 +1,5 @@
 To rebuild everything, run mkbuild.sh in this directory.
+
+Requires:
+*  Ragel
+*  Trimext (https://github.com/michaelnmmeyer/trimext)

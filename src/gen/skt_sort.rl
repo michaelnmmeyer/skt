@@ -4,6 +4,9 @@ machine skt_sort_key;
 
 alphtype unsigned char;
 
+include symbol "data/sort/symbol.rl";
+include whitespace "data/sort/whitespace.rl";
+
 action A0 {
    skt_buf_grow(buf, 2);
    buf->data[buf->size++] = 1;
@@ -786,6 +789,8 @@ main := |*
    "s" => A127;
    "H" => A128;
    "h" => A129;
+   dash;
+   whitespace;
    any => {
       skt_buf_grow(buf, 2);
       buf->data[buf->size++] = 0xff;
