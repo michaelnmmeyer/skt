@@ -4,7 +4,6 @@
 
 #include <stddef.h>
 #include <stdarg.h>
-#include <stdio.h>
 #include <assert.h>
 #ifndef SKT_H
 #define SKT_H
@@ -80,30 +79,6 @@ void skt_buf_grow(struct skt_buf *buf, size_t incr);
 
 void skt_buf_set(struct skt_buf *buf, const void *data, size_t size);
 
-#define skt_buf_setl(buf, lit) skt_buf_set(buf, "" lit, sizeof lit - 1)
-
-void skt_buf_sets(struct skt_buf *buf, const char *str);
-
-void skt_buf_cat(struct skt_buf *buf, const void *data, size_t size);
-
-#define skt_buf_catl(buf, lit) skt_buf_cat(buf, "" lit, sizeof lit - 1)
-
-void skt_buf_cats(struct skt_buf *buf, const char *str);
-
-void skt_buf_catc(struct skt_buf *buf, int c);
-
-void skt_buf_printf(struct skt_buf *buf, const char *format, ...)
-#ifdef __GNUC__
-   __attribute__((format(printf, 2, 3)))
-#endif
-   ;
-
-void skt_buf_vprintf(struct skt_buf *buf, const char *format, va_list ap)
-#ifdef __GNUC__
-   __attribute__((format(printf, 2, 0)))
-#endif
-   ;
-
 static inline void skt_buf_truncate(struct skt_buf *buf, size_t size)
 {
    assert(size < buf->alloc || size == 0);
@@ -127,12 +102,6 @@ static inline void skt_buf_truncate(struct skt_buf *buf, size_t size)
 noreturn void skt_fatal(const char *msg, ...);
 
 void *skt_malloc(size_t size)
-#ifdef ___GNUC__
-   __attribute__((malloc))
-#endif
-   ;
-
-void *skt_calloc(size_t nmemb, size_t size)
 #ifdef ___GNUC__
    __attribute__((malloc))
 #endif
@@ -197,65 +166,17 @@ void skt_buf_fini(struct skt_buf *buf)
       free(buf->data);
 }
 
-void skt_buf_set(struct skt_buf *buf, const void *data, size_t size)
-{
-   skt_buf_clear(buf);
-   skt_buf_cat(buf, data, size);
-}
-
-void skt_buf_sets(struct skt_buf *buf, const char *str)
-{
-   skt_buf_set(buf, str, strlen(str));
-}
-
-void skt_buf_cat(struct skt_buf *buf, const void *data, size_t size)
+static void skt_buf_cat(struct skt_buf *buf, const void *data, size_t size)
 {
    skt_buf_grow(buf, size);
    memcpy(&buf->data[buf->size], data, size);
    buf->data[buf->size += size] = '\0';
 }
 
-void skt_buf_catc(struct skt_buf *buf, int c)
+void skt_buf_set(struct skt_buf *buf, const void *data, size_t size)
 {
-   skt_buf_grow(buf, 1);
-   buf->data[buf->size++] = c;
-   buf->data[buf->size] = '\0';
-}
-
-void skt_buf_cats(struct skt_buf *buf, const char *str)
-{
-   skt_buf_cat(buf, str, strlen(str));
-}
-
-void skt_buf_printf(struct skt_buf *buf, const char *fmt, ...)
-{
-   va_list ap;
-   va_start(ap, fmt);
-   skt_buf_vprintf(buf, fmt, ap);
-   va_end(ap);
-}
-
-static size_t vsnprintf_unsigned(char *buf, size_t size,
-                                 const char *fmt, va_list ap)
-{
-   int len = vsnprintf(buf, size, fmt, ap);
-   return len < 0 ? 0 : len;
-}
-
-void skt_buf_vprintf(struct skt_buf *buf, const char *fmt, va_list ap)
-{
-   va_list copy;
-   va_copy(copy, ap);
-   size_t avail = buf->alloc - buf->size;
-   size_t size = vsnprintf_unsigned(&buf->data[buf->size], avail, fmt, copy);
-   va_end(copy);
-
-   if (size >= avail) {
-      skt_buf_grow(buf, size);
-      avail = buf->alloc - buf->size;
-      size = vsnprintf_unsigned(&buf->data[buf->size], avail, fmt, ap);
-   }
-   buf->size += size;
+   skt_buf_clear(buf);
+   skt_buf_cat(buf, data, size);
 }
 #include <stdlib.h>
 #include <string.h>
@@ -291,15 +212,6 @@ void *skt_realloc(void *mem, size_t size)
    if (!new)
       SKT_OOM();
    return new;
-}
-
-void *skt_calloc(size_t nmemb, size_t size)
-{
-   assert(nmemb && size);
-   void *mem = calloc(nmemb, size);
-   if (!mem)
-      SKT_OOM();
-   return mem;
 }
 #include <stdlib.h>
 #include <stdio.h>

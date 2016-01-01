@@ -7,7 +7,7 @@ CFLAGS += -flto -fdata-sections -ffunction-sections -Wl,--gc-sections
 AMALG = skt.h skt.c
 BINARIES = skt_sort skt_translit
 
-SOURCES = $(wildcard src/*.c) $(wildcard src/*.c) $(wildcard src/gen/*.ic)
+SOURCES = $(wildcard src/*.h) $(wildcard src/*.c) $(wildcard src/gen/*.ic)
 
 #--------------------------------------
 # Abstract targets

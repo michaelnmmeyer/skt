@@ -34,12 +34,3 @@ void *skt_realloc(void *mem, size_t size)
       SKT_OOM();
    return new;
 }
-
-void *skt_calloc(size_t nmemb, size_t size)
-{
-   assert(nmemb && size);
-   void *mem = calloc(nmemb, size);
-   if (!mem)
-      SKT_OOM();
-   return mem;
-}

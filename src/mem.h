@@ -16,12 +16,6 @@ void *skt_malloc(size_t size)
 #endif
    ;
 
-void *skt_calloc(size_t nmemb, size_t size)
-#ifdef ___GNUC__
-   __attribute__((malloc))
-#endif
-   ;
-
 void *skt_realloc(void *mem, size_t size);
 
 /* For reallocating arrays.
