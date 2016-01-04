@@ -56,7 +56,8 @@ void skt_buf_fini(struct skt_buf *buf);
  *****************************************************************************/
 
 /* Creates a sort key for a IAST-encoded string.
- * If the provided string doesn't contain nul bytes, the created key won't, too.
+ * Equivalent to strxfrm(). If the provided string doesn't contain nul bytes,
+ * the created key won't, too.
  */
 void skt_sort_key(struct skt_buf *buf, const char *str, size_t len);
 

@@ -17,7 +17,7 @@ A modern C compiler is required, which means either GCC or CLang. Then:
 
 The above installs two binaries: `skt_sort` and `skt_translit`. Internal
 routines used by these tools are defined in the two source files in this
-directory.
+directory. A Lua binding is available in the `lua` directory.
 
 
 ## Usage

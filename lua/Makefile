@@ -1,6 +1,7 @@
 PREFIX = /usr/local
 LUA_VERSION = 5.2
 
+CFLAGS = -I/usr/include/lua$(LUA_VERSION)
 CFLAGS = -std=c11 -fPIC -shared -g -Wall -Werror
 CFLAGS += -O2 -DNDEBUG -march=native -mtune=native -fomit-frame-pointer
 
@@ -22,5 +23,5 @@ uninstall:
 
 .PHONY: all clean check install uninstall
 
-skt.so: lua_skt.c ../skt.c
+$(LIB): skt.c ../skt.c
 	$(CC) $(CFLAGS) $^ -o $@
