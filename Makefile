@@ -20,7 +20,7 @@ check: $(BINARIES)
 	cd test && ./test_sort.sh
 
 clean:
-	rm -f $(BINARIES)
+	rm -f $(BINARIES) lua/skt.so
 
 install: $(BINARIES)
 	for file in $(BINARIES); do                                                 \
