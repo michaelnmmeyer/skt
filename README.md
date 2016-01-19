@@ -1,6 +1,6 @@
 # skt
 
-Sanskrit transliteration and sorting.
+Sanskrit transliteration and collation.
 
 
 ## Purpose
