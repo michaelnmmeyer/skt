@@ -67,5 +67,5 @@ const char *skt_map_description(const char *input_scheme,
 
    if (input < NUM_SCHEMES && output < NUM_SCHEMES)
       return skt_maps_description[input][output];
-   return ""; 
+   return "";
 }

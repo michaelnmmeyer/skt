@@ -120,7 +120,7 @@ def mkeofcheck(table, input_scheme, output_scheme):
 
 def mkmachine(table, mapping):
    input_scheme, output_scheme = os.path.splitext(os.path.basename(mapping))[0].split("-")
-   
+
    if input_scheme in {"iast", "iastc"}:
       for category, sub_table in table.copy().items():
          if category == "VIRAMA":
@@ -141,7 +141,7 @@ def mkmachine(table, mapping):
    data = data.replace("$FROM_CONSONANT", consonants_rules)
    data = data.replace("$RULES", rules)
    data = data.replace("$EOF_CHECK", eof_check)
-   
+
    output_file = "skt_translit_%s_%s.rl" % (input_scheme, output_scheme)
    with open(output_file, "w") as fp:
       fp.write(data)

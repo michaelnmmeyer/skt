@@ -32,7 +32,7 @@ static int lua_skt_translit(lua_State *lua)
 {
    size_t len;
    const char *str = luaL_checklstring(lua, 1, &len);
-   
+
    const char *input = luaL_optstring(lua, 2, "velthuis");
    const char *output = luaL_optstring(lua, 3, "iast");
    skt_translit func = skt_translit_func(input, output);
@@ -41,12 +41,12 @@ static int lua_skt_translit(lua_State *lua)
       lua_pushfstring(lua, "no such mapping: %s -> %s", input, output);
       return 2;
    }
-   
+
    struct skt_buf buf = SKT_BUF_INIT;
-   func(&buf, str, len);   
+   func(&buf, str, len);
    lua_pushlstring(lua, buf.data, buf.size);
    skt_buf_fini(&buf);
-   
+
    return 1;
 }
 
@@ -54,12 +54,12 @@ static int lua_skt_sort_key(lua_State *lua)
 {
    size_t len;
    const char *str = luaL_checklstring(lua, 1, &len);
-   
+
    struct skt_buf buf = SKT_BUF_INIT;
    skt_sort_key(&buf, str, len);
    lua_pushlstring(lua, buf.data, buf.size);
    skt_buf_fini(&buf);
-   
+
    return 1;
 }
 

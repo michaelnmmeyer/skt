@@ -48,5 +48,5 @@ skt.h: src/skt.h
 cmd/%.ih: cmd/%.hlp
 	scripts/mkcstring.py < $< > $@
 
-%: cmd/%.c cmd/cmd.c cmd/util.c skt.c
+%: cmd/%.c cmd/cmd.c cmd/kabak.c skt.c
 	$(CC) $(CFLAGS) $^ -o $@

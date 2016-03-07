@@ -17,7 +17,7 @@ $RULES
       skt_buf_grow(buf, 2);
       buf->data[buf->size++] = 0xff;
       buf->data[buf->size++] = *p;
-   }; 
+   };
 *|;
 
 }%%

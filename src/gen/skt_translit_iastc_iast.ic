@@ -14,82 +14,82 @@ static void skt_translit_iastc_iast(struct skt_buf *buf,
    const unsigned char *const eof = pe;
 
    buf->size = 0;
-   
+
 #line 19 "skt_translit_iastc_iast.ic"
 static const char _skt_translit_iastc_iast_actions[] = {
-	0, 1, 0, 1, 1, 1, 2, 1, 
-	3, 1, 4, 1, 5, 1, 6, 1, 
-	7, 1, 8, 1, 9, 1, 10, 1, 
-	11, 1, 12, 1, 13, 1, 14, 1, 
-	15, 1, 16, 1, 17
+   0, 1, 0, 1, 1, 1, 2, 1,
+   3, 1, 4, 1, 5, 1, 6, 1,
+   7, 1, 8, 1, 9, 1, 10, 1,
+   11, 1, 12, 1, 13, 1, 14, 1,
+   15, 1, 16, 1, 17
 };
 
 static const char _skt_translit_iastc_iast_key_offsets[] = {
-	0, 1, 2, 3, 4, 5, 6, 7, 
-	8, 12, 13, 14, 15, 16, 17, 18, 
-	19
+   0, 1, 2, 3, 4, 5, 6, 7,
+   8, 12, 13, 14, 15, 16, 17, 18,
+   19
 };
 
 static const unsigned char _skt_translit_iastc_iast_trans_keys[] = {
-	165u, 132u, 165u, 132u, 165u, 132u, 165u, 132u, 
-	76u, 82u, 108u, 114u, 204u, 204u, 204u, 204u, 
-	204u, 204u, 204u, 204u, 0
+   165u, 132u, 165u, 132u, 165u, 132u, 165u, 132u,
+   76u, 82u, 108u, 114u, 204u, 204u, 204u, 204u,
+   204u, 204u, 204u, 204u, 0
 };
 
 static const char _skt_translit_iastc_iast_single_lengths[] = {
-	1, 1, 1, 1, 1, 1, 1, 1, 
-	4, 1, 1, 1, 1, 1, 1, 1, 
-	1
+   1, 1, 1, 1, 1, 1, 1, 1,
+   4, 1, 1, 1, 1, 1, 1, 1,
+   1
 };
 
 static const char _skt_translit_iastc_iast_range_lengths[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	0
+   0, 0, 0, 0, 0, 0, 0, 0,
+   0, 0, 0, 0, 0, 0, 0, 0,
+   0
 };
 
 static const char _skt_translit_iastc_iast_index_offsets[] = {
-	0, 2, 4, 6, 8, 10, 12, 14, 
-	16, 21, 23, 25, 27, 29, 31, 33, 
-	35
+   0, 2, 4, 6, 8, 10, 12, 14,
+   16, 21, 23, 25, 27, 29, 31, 33,
+   35
 };
 
 static const char _skt_translit_iastc_iast_trans_targs[] = {
-	10, 8, 8, 8, 12, 8, 8, 8, 
-	14, 8, 8, 8, 16, 8, 8, 8, 
-	9, 11, 13, 15, 8, 0, 8, 1, 
-	8, 2, 8, 3, 8, 4, 8, 5, 
-	8, 6, 8, 7, 8, 8, 8, 8, 
-	8, 8, 8, 8, 8, 8, 8, 8, 
-	8, 8, 8, 8, 8, 0
+   10, 8, 8, 8, 12, 8, 8, 8,
+   14, 8, 8, 8, 16, 8, 8, 8,
+   9, 11, 13, 15, 8, 0, 8, 1,
+   8, 2, 8, 3, 8, 4, 8, 5,
+   8, 6, 8, 7, 8, 8, 8, 8,
+   8, 8, 8, 8, 8, 8, 8, 8,
+   8, 8, 8, 8, 8, 0
 };
 
 static const char _skt_translit_iastc_iast_trans_actions[] = {
-	5, 35, 7, 27, 5, 35, 9, 29, 
-	5, 35, 11, 31, 5, 35, 13, 33, 
-	5, 5, 5, 5, 15, 0, 25, 0, 
-	17, 0, 25, 0, 19, 0, 25, 0, 
-	21, 0, 25, 0, 23, 35, 27, 35, 
-	29, 35, 31, 35, 33, 25, 17, 25, 
-	19, 25, 21, 25, 23, 0
+   5, 35, 7, 27, 5, 35, 9, 29,
+   5, 35, 11, 31, 5, 35, 13, 33,
+   5, 5, 5, 5, 15, 0, 25, 0,
+   17, 0, 25, 0, 19, 0, 25, 0,
+   21, 0, 25, 0, 23, 35, 27, 35,
+   29, 35, 31, 35, 33, 25, 17, 25,
+   19, 25, 21, 25, 23, 0
 };
 
 static const char _skt_translit_iastc_iast_to_state_actions[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	1, 0, 0, 0, 0, 0, 0, 0, 
-	0
+   0, 0, 0, 0, 0, 0, 0, 0,
+   1, 0, 0, 0, 0, 0, 0, 0,
+   0
 };
 
 static const char _skt_translit_iastc_iast_from_state_actions[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 
-	3, 0, 0, 0, 0, 0, 0, 0, 
-	0
+   0, 0, 0, 0, 0, 0, 0, 0,
+   3, 0, 0, 0, 0, 0, 0, 0,
+   0
 };
 
 static const char _skt_translit_iastc_iast_eof_trans[] = {
-	44, 39, 44, 41, 44, 43, 44, 45, 
-	0, 52, 47, 52, 49, 52, 51, 52, 
-	53
+   44, 39, 44, 41, 44, 43, 44, 45,
+   0, 52, 47, 52, 49, 52, 51, 52,
+   53
 };
 
 static const int skt_translit_iastc_iast_start = 8;
@@ -100,263 +100,263 @@ static const int skt_translit_iastc_iast_en_main = 8;
 
 
 #line 94 "skt_translit_iastc_iast.rl"
-   
+
 #line 105 "skt_translit_iastc_iast.ic"
-	{
-	cs = skt_translit_iastc_iast_start;
-	ts = 0;
-	te = 0;
-	act = 0;
-	}
+   {
+   cs = skt_translit_iastc_iast_start;
+   ts = 0;
+   te = 0;
+   act = 0;
+   }
 
 #line 95 "skt_translit_iastc_iast.rl"
-   
+
 #line 115 "skt_translit_iastc_iast.ic"
-	{
-	int _klen;
-	unsigned int _trans;
-	const char *_acts;
-	unsigned int _nacts;
-	const unsigned char *_keys;
+   {
+   int _klen;
+   unsigned int _trans;
+   const char *_acts;
+   unsigned int _nacts;
+   const unsigned char *_keys;
 
-	if ( p == pe )
-		goto _test_eof;
+   if ( p == pe )
+      goto _test_eof;
 _resume:
-	_acts = _skt_translit_iastc_iast_actions + _skt_translit_iastc_iast_from_state_actions[cs];
-	_nacts = (unsigned int) *_acts++;
-	while ( _nacts-- > 0 ) {
-		switch ( *_acts++ ) {
-	case 1:
+   _acts = _skt_translit_iastc_iast_actions + _skt_translit_iastc_iast_from_state_actions[cs];
+   _nacts = (unsigned int) *_acts++;
+   while ( _nacts-- > 0 ) {
+      switch ( *_acts++ ) {
+   case 1:
 #line 1 "NONE"
-	{ts = p;}
-	break;
+   {ts = p;}
+   break;
 #line 134 "skt_translit_iastc_iast.ic"
-		}
-	}
+      }
+   }
 
-	_keys = _skt_translit_iastc_iast_trans_keys + _skt_translit_iastc_iast_key_offsets[cs];
-	_trans = _skt_translit_iastc_iast_index_offsets[cs];
+   _keys = _skt_translit_iastc_iast_trans_keys + _skt_translit_iastc_iast_key_offsets[cs];
+   _trans = _skt_translit_iastc_iast_index_offsets[cs];
 
-	_klen = _skt_translit_iastc_iast_single_lengths[cs];
-	if ( _klen > 0 ) {
-		const unsigned char *_lower = _keys;
-		const unsigned char *_mid;
-		const unsigned char *_upper = _keys + _klen - 1;
-		while (1) {
-			if ( _upper < _lower )
-				break;
+   _klen = _skt_translit_iastc_iast_single_lengths[cs];
+   if ( _klen > 0 ) {
+      const unsigned char *_lower = _keys;
+      const unsigned char *_mid;
+      const unsigned char *_upper = _keys + _klen - 1;
+      while (1) {
+         if ( _upper < _lower )
+            break;
 
-			_mid = _lower + ((_upper-_lower) >> 1);
-			if ( (*p) < *_mid )
-				_upper = _mid - 1;
-			else if ( (*p) > *_mid )
-				_lower = _mid + 1;
-			else {
-				_trans += (unsigned int)(_mid - _keys);
-				goto _match;
-			}
-		}
-		_keys += _klen;
-		_trans += _klen;
-	}
+         _mid = _lower + ((_upper-_lower) >> 1);
+         if ( (*p) < *_mid )
+            _upper = _mid - 1;
+         else if ( (*p) > *_mid )
+            _lower = _mid + 1;
+         else {
+            _trans += (unsigned int)(_mid - _keys);
+            goto _match;
+         }
+      }
+      _keys += _klen;
+      _trans += _klen;
+   }
 
-	_klen = _skt_translit_iastc_iast_range_lengths[cs];
-	if ( _klen > 0 ) {
-		const unsigned char *_lower = _keys;
-		const unsigned char *_mid;
-		const unsigned char *_upper = _keys + (_klen<<1) - 2;
-		while (1) {
-			if ( _upper < _lower )
-				break;
+   _klen = _skt_translit_iastc_iast_range_lengths[cs];
+   if ( _klen > 0 ) {
+      const unsigned char *_lower = _keys;
+      const unsigned char *_mid;
+      const unsigned char *_upper = _keys + (_klen<<1) - 2;
+      while (1) {
+         if ( _upper < _lower )
+            break;
 
-			_mid = _lower + (((_upper-_lower) >> 1) & ~1);
-			if ( (*p) < _mid[0] )
-				_upper = _mid - 2;
-			else if ( (*p) > _mid[1] )
-				_lower = _mid + 2;
-			else {
-				_trans += (unsigned int)((_mid - _keys)>>1);
-				goto _match;
-			}
-		}
-		_trans += _klen;
-	}
+         _mid = _lower + (((_upper-_lower) >> 1) & ~1);
+         if ( (*p) < _mid[0] )
+            _upper = _mid - 2;
+         else if ( (*p) > _mid[1] )
+            _lower = _mid + 2;
+         else {
+            _trans += (unsigned int)((_mid - _keys)>>1);
+            goto _match;
+         }
+      }
+      _trans += _klen;
+   }
 
 _match:
 _eof_trans:
-	cs = _skt_translit_iastc_iast_trans_targs[_trans];
+   cs = _skt_translit_iastc_iast_trans_targs[_trans];
 
-	if ( _skt_translit_iastc_iast_trans_actions[_trans] == 0 )
-		goto _again;
+   if ( _skt_translit_iastc_iast_trans_actions[_trans] == 0 )
+      goto _again;
 
-	_acts = _skt_translit_iastc_iast_actions + _skt_translit_iastc_iast_trans_actions[_trans];
-	_nacts = (unsigned int) *_acts++;
-	while ( _nacts-- > 0 )
-	{
-		switch ( *_acts++ )
-		{
-	case 2:
+   _acts = _skt_translit_iastc_iast_actions + _skt_translit_iastc_iast_trans_actions[_trans];
+   _nacts = (unsigned int) *_acts++;
+   while ( _nacts-- > 0 )
+   {
+      switch ( *_acts++ )
+      {
+   case 2:
 #line 1 "NONE"
-	{te = p+1;}
-	break;
-	case 3:
+   {te = p+1;}
+   break;
+   case 3:
 #line 36 "skt_translit_iastc_iast.rl"
-	{te = p+1;{
+   {te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 184;
    buf->data[buf->size++] = 184;
 }}
-	break;
-	case 4:
+   break;
+   case 4:
 #line 57 "skt_translit_iastc_iast.rl"
-	{te = p+1;{
+   {te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 185;
    buf->data[buf->size++] = 156;
 }}
-	break;
-	case 5:
+   break;
+   case 5:
 #line 29 "skt_translit_iastc_iast.rl"
-	{te = p+1;{
+   {te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 184;
    buf->data[buf->size++] = 185;
 }}
-	break;
-	case 6:
+   break;
+   case 6:
 #line 8 "skt_translit_iastc_iast.rl"
-	{te = p+1;{
+   {te = p+1;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 185;
    buf->data[buf->size++] = 157;
 }}
-	break;
-	case 7:
+   break;
+   case 7:
 #line 75 "skt_translit_iastc_iast.rl"
-	{te = p+1;{
+   {te = p+1;{
       skt_buf_grow(buf, 1);
       buf->data[buf->size++] = *p;
    }}
-	break;
-	case 8:
+   break;
+   case 8:
 #line 50 "skt_translit_iastc_iast.rl"
-	{te = p;p--;{
+   {te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 184;
    buf->data[buf->size++] = 182;
 }}
-	break;
-	case 9:
+   break;
+   case 9:
 #line 43 "skt_translit_iastc_iast.rl"
-	{te = p;p--;{
+   {te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 185;
    buf->data[buf->size++] = 154;
 }}
-	break;
-	case 10:
+   break;
+   case 10:
 #line 22 "skt_translit_iastc_iast.rl"
-	{te = p;p--;{
+   {te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 184;
    buf->data[buf->size++] = 183;
 }}
-	break;
-	case 11:
+   break;
+   case 11:
 #line 15 "skt_translit_iastc_iast.rl"
-	{te = p;p--;{
+   {te = p;p--;{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 185;
    buf->data[buf->size++] = 155;
 }}
-	break;
-	case 12:
+   break;
+   case 12:
 #line 75 "skt_translit_iastc_iast.rl"
-	{te = p;p--;{
+   {te = p;p--;{
       skt_buf_grow(buf, 1);
       buf->data[buf->size++] = *p;
    }}
-	break;
-	case 13:
+   break;
+   case 13:
 #line 50 "skt_translit_iastc_iast.rl"
-	{{p = ((te))-1;}{
+   {{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 184;
    buf->data[buf->size++] = 182;
 }}
-	break;
-	case 14:
+   break;
+   case 14:
 #line 43 "skt_translit_iastc_iast.rl"
-	{{p = ((te))-1;}{
+   {{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 185;
    buf->data[buf->size++] = 154;
 }}
-	break;
-	case 15:
+   break;
+   case 15:
 #line 22 "skt_translit_iastc_iast.rl"
-	{{p = ((te))-1;}{
+   {{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 184;
    buf->data[buf->size++] = 183;
 }}
-	break;
-	case 16:
+   break;
+   case 16:
 #line 15 "skt_translit_iastc_iast.rl"
-	{{p = ((te))-1;}{
+   {{p = ((te))-1;}{
    skt_buf_grow(buf, 3);
    buf->data[buf->size++] = 225;
    buf->data[buf->size++] = 185;
    buf->data[buf->size++] = 155;
 }}
-	break;
-	case 17:
+   break;
+   case 17:
 #line 75 "skt_translit_iastc_iast.rl"
-	{{p = ((te))-1;}{
+   {{p = ((te))-1;}{
       skt_buf_grow(buf, 1);
       buf->data[buf->size++] = *p;
    }}
-	break;
+   break;
 #line 332 "skt_translit_iastc_iast.ic"
-		}
-	}
+      }
+   }
 
 _again:
-	_acts = _skt_translit_iastc_iast_actions + _skt_translit_iastc_iast_to_state_actions[cs];
-	_nacts = (unsigned int) *_acts++;
-	while ( _nacts-- > 0 ) {
-		switch ( *_acts++ ) {
-	case 0:
+   _acts = _skt_translit_iastc_iast_actions + _skt_translit_iastc_iast_to_state_actions[cs];
+   _nacts = (unsigned int) *_acts++;
+   while ( _nacts-- > 0 ) {
+      switch ( *_acts++ ) {
+   case 0:
 #line 1 "NONE"
-	{ts = 0;}
-	break;
+   {ts = 0;}
+   break;
 #line 345 "skt_translit_iastc_iast.ic"
-		}
-	}
+      }
+   }
 
-	if ( ++p != pe )
-		goto _resume;
-	_test_eof: {}
-	if ( p == eof )
-	{
-	if ( _skt_translit_iastc_iast_eof_trans[cs] > 0 ) {
-		_trans = _skt_translit_iastc_iast_eof_trans[cs] - 1;
-		goto _eof_trans;
-	}
-	}
+   if ( ++p != pe )
+      goto _resume;
+   _test_eof: {}
+   if ( p == eof )
+   {
+   if ( _skt_translit_iastc_iast_eof_trans[cs] > 0 ) {
+      _trans = _skt_translit_iastc_iast_eof_trans[cs] - 1;
+      goto _eof_trans;
+   }
+   }
 
-	}
+   }
 
 #line 96 "skt_translit_iastc_iast.rl"
 

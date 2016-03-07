@@ -98,13 +98,13 @@ def mkrules(table):
    return '\n'.join(actions), '\n'.join(rules)
 
 ESCAPE = {
-	"\n": "n",
-	"\t": "t",
-	"\\": "\\",
-	"\"": '"',
+   "\n": "n",
+   "\t": "t",
+   "\\": "\\",
+   "\"": '"',
 }
 for key, value in ESCAPE.copy().items():
-	ESCAPE[key] = "\\" + value
+   ESCAPE[key] = "\\" + value
 
 def escape(s):
    return "".join(ESCAPE.get(c, c) for c in s)
@@ -117,7 +117,7 @@ def mkmachine(table, mapping):
       table = make_case_insensitive(table)
    table = remove_useless_mappings(table)
    actions, rules = mkrules(table)
-   
+
    data = open("skt_translit.tpl").read().rstrip()
    data = data.replace("$INPUT_SCHEME", input_scheme)
    data = data.replace("$OUTPUT_SCHEME", output_scheme)

@@ -48,7 +48,7 @@ def mkrules(phonems):
 
 def mkmachine(phonems):
    actions, rules = mkrules(phonems)
-   data = open("skt_sort.tpl").read().rstrip() 
+   data = open("skt_sort.tpl").read().rstrip()
    data = data.replace("$ACTIONS", actions)
    data = data.replace("$RULES", rules)
    return data

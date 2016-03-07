@@ -1,6 +1,8 @@
 #ifndef CMD_H
 #define CMD_H
 
+#define CMD_VERSION "0.4"
+
 #include <stddef.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -8,8 +10,17 @@
 
 extern const char *g_progname;
 
-void warn(const char *, ...);
-noreturn void die(const char *, ...);
+noreturn void die(const char *, ...)
+#ifdef __GNUC__
+   __attribute__((format(printf, 1, 2)))
+#endif
+;
+
+void complain(const char *, ...)
+#ifdef __GNUC__
+   __attribute__((format(printf, 1, 2)))
+#endif
+;
 
 struct command {
    const char *name;    // NULL serves as a sentinel.
